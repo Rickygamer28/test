@@ -1,7 +1,1 @@
-{
-  "values": [
-    "skyblocks:night_sky_block",
-    "skyblocks:sunset_sky_block",
-    "skyblocks:nebula_sky_block"
-  ]
-}
+{"values":["skyblocks:nebula_sky_block"]}
