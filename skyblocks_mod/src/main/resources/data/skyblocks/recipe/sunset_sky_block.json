@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "category": "building",
-  "ingredients": [
-    { "item": "minecraft:glass" },
-    { "item": "minecraft:orange_dye" }
-  ],
-  "result": { "id": "skyblocks:sunset_sky_block", "count": 1 }
-}
