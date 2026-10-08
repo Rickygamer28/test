@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    { "item": "minecraft:glass" },
+    { "item": "minecraft:amethyst_shard" }
+  ],
+  "result": { "id": "skyblocks:nebula_sky_block", "count": 1 }
+}
