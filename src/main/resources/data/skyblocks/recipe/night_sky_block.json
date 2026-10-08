@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    { "item": "minecraft:glass" },
+    { "item": "minecraft:lapis_lazuli" }
+  ],
+  "result": { "id": "skyblocks:night_sky_block", "count": 1 }
+}
