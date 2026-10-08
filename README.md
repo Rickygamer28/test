@@ -29,6 +29,12 @@ open the Actions tab, click the latest run, and download the "skyblocks-jar" art
   infinity: it stays fixed in the world, and view bobbing (which lives in ProjMat) does not disturb it.
 - Core shaders don't work with Iris/Oculus shader packs.
 
+## Item rendering
+The item (inventory, hand, dropped, item frames) is drawn by SkyBlockItemRenderer with shaders/core/sky_item.*.
+Items are drawn with their own camera matrices, so SkyMatrices copies the world camera rotation and inverse
+projection into the item shader once per frame (RenderLevelStageEvent, AFTER_SKY). The item shows the sky as
+seen at its position on screen, so it changes as you look around, like the placed block.
+
 ## Image credit
 The Milky Way sky image (assets/skyblocks/textures/sky/milky_way_sky_block.png) is a user-supplied panorama.
 Add its author, source and license here (some panoramas, for example CC BY ones, require a credit line).

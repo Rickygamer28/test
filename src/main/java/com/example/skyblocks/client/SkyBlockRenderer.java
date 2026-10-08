@@ -16,7 +16,7 @@ import org.joml.Matrix4f;
 public class SkyBlockRenderer implements BlockEntityRenderer<SkyBlockEntity> {
 
     // 4 corners per face, in Direction.values() order: DOWN, UP, NORTH, SOUTH, WEST, EAST
-    private static final float[][][] FACES = {
+    public static final float[][][] FACES = {
             {{0, 0, 0}, {1, 0, 0}, {1, 0, 1}, {0, 0, 1}}, // DOWN
             {{0, 1, 0}, {0, 1, 1}, {1, 1, 1}, {1, 1, 0}}, // UP
             {{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}}, // NORTH
