@@ -1,7 +1,7 @@
 # Sky Blocks (NeoForge 1.21.1)
 
 Decorative blocks that show a skybox on their faces through a custom core shader,
-like a window into another sky. One block: the Nebula Sky Block.
+like a window into another sky. One block: the Milky Way Sky Block.
 
 Recipe (shapeless): Glass + Amethyst Shard.
 
@@ -28,3 +28,7 @@ open the Actions tab, click the latest run, and download the "skyblocks-jar" art
   ScreenSize, then samples the equirectangular image (longitude/latitude). This is a window onto a sky at
   infinity: it stays fixed in the world, and view bobbing (which lives in ProjMat) does not disturb it.
 - Core shaders don't work with Iris/Oculus shader packs.
+
+## Image credit
+The Milky Way sky image (assets/skyblocks/textures/sky/milky_way_sky_block.png) is a user-supplied panorama.
+Add its author, source and license here (some panoramas, for example CC BY ones, require a credit line).

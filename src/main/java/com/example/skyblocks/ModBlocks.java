@@ -14,17 +14,17 @@ public final class ModBlocks {
 
     // The registry name decides which texture is projected:
     // assets/skyblocks/textures/sky/<registry_name>.png
-    public static final DeferredBlock<SkyBlock> NEBULA_SKY = BLOCKS.registerBlock(
-            "nebula_sky_block",
+    public static final DeferredBlock<SkyBlock> MILKY_WAY_SKY = BLOCKS.registerBlock(
+            "milky_way_sky_block",
             SkyBlock::new,
             BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.COLOR_PURPLE)
+                    .mapColor(MapColor.COLOR_BLACK)
                     .strength(1.5F, 6.0F)
                     .sound(SoundType.GLASS)
                     .requiresCorrectToolForDrops());
 
-    public static final DeferredItem<BlockItem> NEBULA_SKY_ITEM =
-            ITEMS.registerSimpleBlockItem("nebula_sky_block", NEBULA_SKY);
+    public static final DeferredItem<BlockItem> MILKY_WAY_SKY_ITEM =
+            ITEMS.registerSimpleBlockItem("milky_way_sky_block", MILKY_WAY_SKY);
 
     private ModBlocks() {}
 }

@@ -5,8 +5,8 @@
       "rolls": 1.0,
       "bonus_rolls": 0.0,
       "conditions": [{ "condition": "minecraft:survives_explosion" }],
-      "entries": [{ "type": "minecraft:item", "name": "skyblocks:nebula_sky_block" }]
+      "entries": [{ "type": "minecraft:item", "name": "skyblocks:milky_way_sky_block" }]
     }
   ],
-  "random_sequence": "skyblocks:blocks/nebula_sky_block"
+  "random_sequence": "skyblocks:blocks/milky_way_sky_block"
 }

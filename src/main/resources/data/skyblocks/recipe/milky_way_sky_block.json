@@ -5,5 +5,5 @@
     { "item": "minecraft:glass" },
     { "item": "minecraft:amethyst_shard" }
   ],
-  "result": { "id": "skyblocks:nebula_sky_block", "count": 1 }
+  "result": { "id": "skyblocks:milky_way_sky_block", "count": 1 }
 }
