@@ -24,7 +24,7 @@ open the Actions tab, click the latest run, and download the "skyblocks-jar" art
 ## How it works
 - SkyBlock uses RenderShape.ENTITYBLOCK_ANIMATED, so it is drawn by SkyBlockRenderer.
 - The renderer draws the visible faces with a custom RenderType using shaders/core/sky_block.*
-- The vertex shader passes the camera-relative vertex position on as a world-space direction;
-  the fragment shader turns it into longitude/latitude and samples the texture, so the sky stays
-  fixed in the world no matter where the block is or where you look.
+- The fragment shader rebuilds the world-space view direction of each pixel from ProjMat, ModelViewMat and
+  ScreenSize, then samples the equirectangular image (longitude/latitude). This is a window onto a sky at
+  infinity: it stays fixed in the world, and view bobbing (which lives in ProjMat) does not disturb it.
 - Core shaders don't work with Iris/Oculus shader packs.
