@@ -19,6 +19,7 @@ public class SkyBlocksMod {
     private void addToCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(ModBlocks.MILKY_WAY_SKY_ITEM);
+            event.accept(ModBlocks.CAT_SKY_ITEM);
         }
     }
 }

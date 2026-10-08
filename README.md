@@ -1,9 +1,9 @@
 # Sky Blocks (NeoForge 1.21.1)
 
 Decorative blocks that show a skybox on their faces through a custom core shader,
-like a window into another sky. One block: the Milky Way Sky Block.
+like a window into another sky. Two blocks: the Milky Way Sky Block and the Cat Sky Block.
 
-Recipe (shapeless): Glass + Amethyst Shard.
+Recipes (shapeless): Milky Way = Glass + Amethyst Shard, Cat = Glass + Raw Cod.
 
 ## Build & run
 Requires JDK 21. Add the Gradle wrapper first:
@@ -38,3 +38,4 @@ seen at its position on screen, so it changes as you look around, like the place
 ## Image credit
 The Milky Way sky image (assets/skyblocks/textures/sky/milky_way_sky_block.png) is a user-supplied panorama.
 Add its author, source and license here (some panoramas, for example CC BY ones, require a credit line).
+The Cat Sky Block image (assets/skyblocks/textures/sky/cat_sky_block.png) is also user-supplied; add its source and license here too.
