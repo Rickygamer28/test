@@ -2,6 +2,7 @@ package com.example.skyblocks;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 /** Holds the client-side renderable model (like Shadered's MaxwellEntity); nothing is saved. */
@@ -14,6 +15,10 @@ public class OiiaCatBlockEntity extends BlockEntity {
     public long animationStart = -1;
 
     public OiiaCatBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.OIIA_CAT.get(), pos, state);
+        this(ModBlockEntities.OIIA_CAT.get(), pos, state);
+    }
+
+    protected OiiaCatBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 }

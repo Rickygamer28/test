@@ -23,6 +23,12 @@ Shadered+ skies (blocks, ores, emitter settings) before removing the mod from a 
   (top `G L G`, middle `L D L`, bottom `G G G`; G = Gray Wool, L = Light Gray Wool, D = Diamond Block).
   It casts a round shadow on the floor like mobs do (Minecraft's own shadow texture; follows the "Entity Shadows" setting,
   fades as the cat floats up while spinning).
+- **Big OIIA Cat**: build a solid 3x3x3 cube of OIIA cats (27 cats). Placing the last one turns the cube into one
+  big cat, 3x the size, facing the way that last cat faced (with a poof and a deep meow). It works the same: a redstone
+  signal on any of its blocks makes it spin, and it has a 3x shadow. Breaking any part (with a pickaxe) breaks the whole
+  cat and gives back the 27 small cats; nothing drops in creative. Pistons can't move it. It has no item of its own.
+  How it works: `BigOiiaCatBlock` fills all 27 blocks (PART_X/Y/Z say where each block sits in the cube). Only the
+  bottom-centre block has a block entity, drawn by the same `OiiaCatRenderer` at size 3. The outline covers the whole cat.
 
 How it works: Shadered's model loader reads every `models/complex/` file of every mod, so our models live in
 `assets/skyblocks/models/complex/` (`oiia_cat.glb` and `oiia_cat_spin.glb`, converted from the original FBX in

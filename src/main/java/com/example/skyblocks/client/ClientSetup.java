@@ -1,9 +1,12 @@
 package com.example.skyblocks.client;
 
+import com.example.skyblocks.BigOiiaCatBlock;
 import com.example.skyblocks.ModBlockEntities;
+import com.example.skyblocks.OiiaCatBlockEntity;
 import com.example.skyblocks.ModItems;
 import com.example.skyblocks.SkyBlocksMod;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,6 +27,8 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.OIIA_CAT.get(), OiiaCatRenderer::new);
+        BlockEntityRendererProvider<OiiaCatBlockEntity> big = context -> new OiiaCatRenderer(context, BigOiiaCatBlock.SIZE);
+        event.registerBlockEntityRenderer(ModBlockEntities.BIG_OIIA_CAT.get(), big);
     }
 
     @SubscribeEvent

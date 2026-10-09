@@ -22,10 +22,20 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 
-/** Same approach as Shadered's MaxwellRenderer: hands the model, with its world matrix, to Shadered's model renderer. */
+/**
+ * Same approach as Shadered's MaxwellRenderer: hands the model, with its world matrix, to Shadered's model renderer.
+ * Draws the small cat (size 1) and the big cat (size 3, from the big cat's bottom-centre block).
+ */
 public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> {
+    private final float size;
 
-    public OiiaCatRenderer(BlockEntityRendererProvider.Context context) {}
+    public OiiaCatRenderer(BlockEntityRendererProvider.Context context) {
+        this(context, 1.0F);
+    }
+
+    public OiiaCatRenderer(BlockEntityRendererProvider.Context context, float size) {
+        this.size = size;
+    }
 
     @Override
     public void render(OiiaCatBlockEntity be, float partialTick, PoseStack poseStack,
@@ -49,7 +59,8 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
         PoseStack pose = new PoseStack();
         pose.translate(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F);
         pose.mulPose(Axis.YP.rotationDegrees(yaw(be.getBlockState().getValue(HorizontalDirectionalBlock.FACING))));
-        pose.scale(OiiaCatModel.SCALE, OiiaCatModel.SCALE, OiiaCatModel.SCALE);
+        float scale = OiiaCatModel.SCALE * size;
+        pose.scale(scale, scale, scale);
         pose.translate(0, OiiaCatModel.FEET, 0);
 
         // Spin only while powered by redstone, starting from the first frame each time the signal turns on.
@@ -69,8 +80,8 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
         AssimpRenderer.getInstance().addModel(model);
 
         // How high the cat's lowest point is above the floor, in blocks (the loaf floats and bobs while spinning).
-        float lift = powered ? (OiiaCatModel.SPIN_BOTTOM + offsetY) * OiiaCatModel.SCALE : 0;
-        renderShadow(be, poseStack, buffer, Math.max(0, lift));
+        float lift = powered ? (OiiaCatModel.SPIN_BOTTOM + offsetY) * scale : 0;
+        renderShadow(be, poseStack, buffer, Math.max(0, lift), size);
     }
 
     private static final ResourceLocation SHADOW = ResourceLocation.withDefaultNamespace("textures/misc/shadow.png");
@@ -83,7 +94,8 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
      * render type and vertex values). Fainter the higher the cat floats; off when "Entity Shadows" is off or there
      * is no solid floor.
      */
-    private static void renderShadow(OiiaCatBlockEntity be, PoseStack poseStack, MultiBufferSource buffer, float lift) {
+    private static void renderShadow(OiiaCatBlockEntity be, PoseStack poseStack, MultiBufferSource buffer, float lift,
+                                     float size) {
         Minecraft mc = Minecraft.getInstance();
         Level level = be.getLevel();
         if (level == null || !mc.options.entityShadows().get()) {
@@ -93,14 +105,14 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
         if (!level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) {
             return;
         }
-        float alpha = 0.5F * Math.max(0, 1 - lift * 2.0F);
+        float alpha = 0.5F * Math.max(0, 1 - lift / size * 2.0F);
         if (alpha <= 0.01F) {
             return;
         }
         VertexConsumer consumer = buffer.getBuffer(SHADOW_TYPE);
         PoseStack.Pose last = poseStack.last();
         float y = 0.002F; // just above the floor (the bottom of our block)
-        float r = SHADOW_RADIUS;
+        float r = SHADOW_RADIUS * size;
         shadowVertex(consumer, last, 0.5F - r, y, 0.5F - r, 0, 0, alpha);
         shadowVertex(consumer, last, 0.5F - r, y, 0.5F + r, 0, 1, alpha);
         shadowVertex(consumer, last, 0.5F + r, y, 0.5F + r, 1, 1, alpha);
@@ -129,6 +141,6 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
 
     @Override
     public AABB getRenderBoundingBox(OiiaCatBlockEntity be) {
-        return new AABB(be.getBlockPos()).inflate(1.5); // the spinning tail reaches past the block
+        return new AABB(be.getBlockPos()).inflate(1.5 * size); // the spinning tail reaches past the block
     }
 }
