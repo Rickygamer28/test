@@ -22,19 +22,23 @@ public final class ModBlocks {
 
     // The registry name decides which texture is projected:
     // assets/skyblocks/textures/sky/<registry_name>.png
-    public static final DeferredBlock<SkyBlock> MILKY_WAY_SKY =
-            BLOCKS.registerBlock("milky_way_sky_block", SkyBlock::new, props(MapColor.COLOR_BLACK));
+    public static final DeferredBlock<SkyBlock> JUPITER_SKY =
+            BLOCKS.registerBlock("jupiter_sky_block", SkyBlock::new, props(MapColor.COLOR_BROWN));
     public static final DeferredBlock<SkyBlock> CAT_SKY =
             BLOCKS.registerBlock("cat_sky_block", SkyBlock::new, props(MapColor.COLOR_ORANGE));
     public static final DeferredBlock<SkyBlock> TWILIGHT_SKY =
             BLOCKS.registerBlock("twilight_sky_block", SkyBlock::new, props(MapColor.COLOR_PINK));
+    public static final DeferredBlock<SkyBlock> HELL_SKY =
+            BLOCKS.registerBlock("hell_sky_block", SkyBlock::new, props(MapColor.COLOR_RED));
 
-    public static final DeferredItem<BlockItem> MILKY_WAY_SKY_ITEM =
-            ITEMS.registerSimpleBlockItem("milky_way_sky_block", MILKY_WAY_SKY);
+    public static final DeferredItem<BlockItem> JUPITER_SKY_ITEM =
+            ITEMS.registerSimpleBlockItem("jupiter_sky_block", JUPITER_SKY);
     public static final DeferredItem<BlockItem> CAT_SKY_ITEM =
             ITEMS.registerSimpleBlockItem("cat_sky_block", CAT_SKY);
     public static final DeferredItem<BlockItem> TWILIGHT_SKY_ITEM =
             ITEMS.registerSimpleBlockItem("twilight_sky_block", TWILIGHT_SKY);
+    public static final DeferredItem<BlockItem> HELL_SKY_ITEM =
+            ITEMS.registerSimpleBlockItem("hell_sky_block", HELL_SKY);
 
     private ModBlocks() {}
 }

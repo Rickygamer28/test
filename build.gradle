@@ -5,7 +5,7 @@ plugins {
 
 version = mod_version
 group = 'com.example.skyblocks'
-base { archivesName = mod_id }
+base { archivesName = 'shadered-plus' }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 

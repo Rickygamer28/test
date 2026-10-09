@@ -1,19 +1,21 @@
-# Sky Blocks (NeoForge 1.21.1)
+# Shadered+ (NeoForge 1.21.1)
 
 Decorative blocks that show a skybox on their faces through a custom core shader,
-like a window into another sky. Three blocks: Milky Way, Cat and Twilight Sky Blocks.
+like a window into another sky. Four blocks: Jupiter, Cat, Twilight and Hell Sky Blocks.
 
-Recipes (shapeless): Milky Way = Glass + Amethyst Shard, Cat = Glass + Raw Cod, Twilight = Glass + Pink Dye.
+All blocks are in their own creative tab, "Shadered+" (new blocks added to ModBlocks.ITEMS appear there automatically).
+
+Recipes (shapeless): Jupiter = Glass + Amethyst Shard, Cat = Glass + Raw Cod, Twilight = Glass + Pink Dye, Hell = Glass + Nether Wart.
 
 ## Build & run
 Requires JDK 21. Add the Gradle wrapper first:
     gradle wrapper --gradle-version 8.10.2
     ./gradlew runClient
-    ./gradlew build      # jar in build/libs/
+    ./gradlew build      # jar in build/libs/shadered-plus-1.0.0.jar
 
 ## Build without installing anything (GitHub Actions)
 Push this folder to a GitHub repository. The workflow in .github/workflows/build.yml builds the mod;
-open the Actions tab, click the latest run, and download the "skyblocks-jar" artifact.
+open the Actions tab, click the latest run, and download the "shadered-plus-jar" artifact.
 
 ## Add your own sky
 Each sky is a cube map: six square face images, named `<block_name>_<face>.png` in
@@ -43,7 +45,6 @@ projection into the item shader once per frame (RenderLevelStageEvent, AFTER_SKY
 seen at its position on screen, so it changes as you look around, like the placed block.
 
 ## Image credit
-The Milky Way sky image (assets/skyblocks/textures/sky/milky_way_sky_block.png) is a user-supplied panorama.
-Add its author, source and license here (some panoramas, for example CC BY ones, require a credit line).
-The Cat Sky Block image (assets/skyblocks/textures/sky/cat_sky_block.png) is also user-supplied; add its source and license here too.
-The Twilight Sky Block is a user-supplied cube map (six faces, 512 px originals upscaled to 1024); add its source and license here too.
+The Jupiter Sky Block faces (assets/skyblocks/textures/sky/jupiter_sky_block_*.png) are a user-supplied cube map,
+as are the Cat panorama (tools/source/cat_sky_block.png), the Twilight cube map and the Hell cube map. Add each source, author and
+license here (some images, for example CC BY ones, require a credit line).

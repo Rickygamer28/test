@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skyblocks:hell_sky_block"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skyblocks:blocks/hell_sky_block"
+}

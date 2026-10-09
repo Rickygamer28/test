@@ -5,8 +5,10 @@ license="MIT"
 [[mods]]
 modId="${mod_id}"
 version="${mod_version}"
-displayName="Sky Blocks"
-description='''Decorative blocks that project a skybox onto their faces using a custom shader, like a window into another sky.'''
+displayName="Shadered+"
+description='''Decorative blocks that project a skybox onto their faces using a custom shader, like a window into another sky.
+
+Unofficial: not made by or affiliated with the Shadered mod or its author.'''
 
 [[dependencies.${mod_id}]]
 modId="neoforge"

@@ -1,7 +1,8 @@
 {
   "values": [
-    "skyblocks:milky_way_sky_block",
+    "skyblocks:jupiter_sky_block",
     "skyblocks:cat_sky_block",
-    "skyblocks:twilight_sky_block"
+    "skyblocks:twilight_sky_block",
+    "skyblocks:hell_sky_block"
   ]
 }

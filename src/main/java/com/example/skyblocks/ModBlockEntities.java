@@ -11,9 +11,10 @@ public final class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<SkyBlockEntity>> SKY_BLOCK = TYPES.register("sky_block",
             () -> BlockEntityType.Builder.of(SkyBlockEntity::new,
-                    ModBlocks.MILKY_WAY_SKY.get(),
+                    ModBlocks.JUPITER_SKY.get(),
                     ModBlocks.CAT_SKY.get(),
-                    ModBlocks.TWILIGHT_SKY.get()).build(null));
+                    ModBlocks.TWILIGHT_SKY.get(),
+                    ModBlocks.HELL_SKY.get()).build(null));
 
     private ModBlockEntities() {}
 }
