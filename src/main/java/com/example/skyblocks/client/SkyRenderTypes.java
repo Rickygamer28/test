@@ -25,9 +25,9 @@ public final class SkyRenderTypes extends RenderType {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static RenderType sky(ResourceLocation texture) {
-        return CACHE.computeIfAbsent(texture, tex -> RenderType.create(
-                "skyblocks_sky_" + tex,
+    public static RenderType sky(ResourceLocation[] faces) {
+        return CACHE.computeIfAbsent(faces[0], key -> RenderType.create(
+                "skyblocks_sky_" + key,
                 DefaultVertexFormat.POSITION,
                 VertexFormat.Mode.QUADS,
                 1536,
@@ -35,14 +35,14 @@ public final class SkyRenderTypes extends RenderType {
                 false,
                 RenderType.CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> skyShader))
-                        .setTextureState(new TextureStateShard(tex, true, false))
+                        .setTextureState(cubeFaces(faces))
                         .setCullState(NO_CULL)
                         .createCompositeState(false)));
     }
 
-    public static RenderType skyItem(ResourceLocation texture) {
-        return ITEM_CACHE.computeIfAbsent(texture, tex -> RenderType.create(
-                "skyblocks_sky_item_" + tex,
+    public static RenderType skyItem(ResourceLocation[] faces) {
+        return ITEM_CACHE.computeIfAbsent(faces[0], key -> RenderType.create(
+                "skyblocks_sky_item_" + key,
                 DefaultVertexFormat.POSITION,
                 VertexFormat.Mode.QUADS,
                 1536,
@@ -50,8 +50,17 @@ public final class SkyRenderTypes extends RenderType {
                 false,
                 RenderType.CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> skyItemShader))
-                        .setTextureState(new TextureStateShard(tex, true, false))
+                        .setTextureState(cubeFaces(faces))
                         .setCullState(NO_CULL)
                         .createCompositeState(false)));
+    }
+
+    /** Binds the six cube faces to Sampler0..Sampler5 (linear filtering, no mipmaps). */
+    private static EmptyTextureStateShard cubeFaces(ResourceLocation[] faces) {
+        MultiTextureStateShard.Builder builder = MultiTextureStateShard.builder();
+        for (ResourceLocation face : faces) {
+            builder.add(face, true, false);
+        }
+        return builder.build();
     }
 }

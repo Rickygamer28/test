@@ -26,11 +26,15 @@ public final class ModBlocks {
             BLOCKS.registerBlock("milky_way_sky_block", SkyBlock::new, props(MapColor.COLOR_BLACK));
     public static final DeferredBlock<SkyBlock> CAT_SKY =
             BLOCKS.registerBlock("cat_sky_block", SkyBlock::new, props(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<SkyBlock> TWILIGHT_SKY =
+            BLOCKS.registerBlock("twilight_sky_block", SkyBlock::new, props(MapColor.COLOR_PINK));
 
     public static final DeferredItem<BlockItem> MILKY_WAY_SKY_ITEM =
             ITEMS.registerSimpleBlockItem("milky_way_sky_block", MILKY_WAY_SKY);
     public static final DeferredItem<BlockItem> CAT_SKY_ITEM =
             ITEMS.registerSimpleBlockItem("cat_sky_block", CAT_SKY);
+    public static final DeferredItem<BlockItem> TWILIGHT_SKY_ITEM =
+            ITEMS.registerSimpleBlockItem("twilight_sky_block", TWILIGHT_SKY);
 
     private ModBlocks() {}
 }

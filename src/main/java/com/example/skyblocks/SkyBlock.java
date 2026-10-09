@@ -18,7 +18,10 @@ import org.jetbrains.annotations.Nullable;
 public class SkyBlock extends Block implements EntityBlock {
     public static final MapCodec<SkyBlock> CODEC = simpleCodec(SkyBlock::new);
 
-    private ResourceLocation skyTexture;
+    /** Cube-map face suffixes, in the order of the shader's Sampler0..Sampler5. */
+    public static final String[] FACE_SUFFIXES = {"px", "nx", "py", "ny", "pz", "nz"};
+
+    private ResourceLocation[] skyFaces;
 
     public SkyBlock(Properties properties) {
         super(properties);
@@ -40,13 +43,17 @@ public class SkyBlock extends Block implements EntityBlock {
         return new SkyBlockEntity(pos, state);
     }
 
-    /** textures/sky/<registry_name>.png (resolved lazily, after registration). */
-    public ResourceLocation getSkyTexture() {
-        if (skyTexture == null) {
+    /** textures/sky/<registry_name>_px|nx|py|ny|pz|nz.png (resolved lazily, after registration). */
+    public ResourceLocation[] getSkyFaces() {
+        if (skyFaces == null) {
             ResourceLocation key = BuiltInRegistries.BLOCK.getKey(this);
-            skyTexture = ResourceLocation.fromNamespaceAndPath(
-                    key.getNamespace(), "textures/sky/" + key.getPath() + ".png");
+            ResourceLocation[] faces = new ResourceLocation[FACE_SUFFIXES.length];
+            for (int i = 0; i < faces.length; i++) {
+                faces[i] = ResourceLocation.fromNamespaceAndPath(
+                        key.getNamespace(), "textures/sky/" + key.getPath() + "_" + FACE_SUFFIXES[i] + ".png");
+            }
+            skyFaces = faces;
         }
-        return skyTexture;
+        return skyFaces;
     }
 }

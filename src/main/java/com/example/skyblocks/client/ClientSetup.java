@@ -53,7 +53,8 @@ public final class ClientSetup {
                 }
                 return renderer;
             }
-        }, ModBlocks.MILKY_WAY_SKY_ITEM.get(), ModBlocks.CAT_SKY_ITEM.get());
+        }, ModBlocks.MILKY_WAY_SKY_ITEM.get(), ModBlocks.CAT_SKY_ITEM.get(),
+                ModBlocks.TWILIGHT_SKY_ITEM.get());
     }
 
     private ClientSetup() {}

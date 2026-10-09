@@ -35,7 +35,7 @@ public class SkyBlockRenderer implements BlockEntityRenderer<SkyBlockEntity> {
             return;
         }
 
-        VertexConsumer consumer = buffer.getBuffer(SkyRenderTypes.sky(skyBlock.getSkyTexture()));
+        VertexConsumer consumer = buffer.getBuffer(SkyRenderTypes.sky(skyBlock.getSkyFaces()));
         Matrix4f pose = poseStack.last().pose();
         Level level = be.getLevel();
         BlockPos pos = be.getBlockPos();

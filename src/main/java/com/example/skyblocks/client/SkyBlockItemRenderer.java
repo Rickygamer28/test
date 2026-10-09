@@ -31,7 +31,7 @@ public class SkyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
             return;
         }
 
-        VertexConsumer consumer = buffer.getBuffer(SkyRenderTypes.skyItem(skyBlock.getSkyTexture()));
+        VertexConsumer consumer = buffer.getBuffer(SkyRenderTypes.skyItem(skyBlock.getSkyFaces()));
         Matrix4f pose = poseStack.last().pose();
 
         for (float[][] face : SkyBlockRenderer.FACES) {
