@@ -9,9 +9,7 @@
   "skyblock_type.skyblocks.hell": "Hell",
   "item.skyblocks.nebula_sky_block": "Nebula Sky Block",
   "skyblock_type.skyblocks.nebula": "Nebula",
-  "item.skyblocks.aurora_sky_block": "Aurora Sky Block",
-  "skyblock_type.skyblocks.aurora": "Aurora",
-  "item.skyblocks.snow_sky_block": "Snow Sky Block",
-  "skyblock_type.skyblocks.snow": "Snow",
+  "item.skyblocks.golden_hour_sky_block": "Golden Hour Sky Block",
+  "skyblock_type.skyblocks.golden_hour": "Golden Hour",
   "block.skyblocks.oiia_cat": "OIIA Cat"
 }

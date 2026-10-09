@@ -1,6 +1,6 @@
 # Shadered+ (NeoForge 1.21.1): an addon for Shadered
 
-Adds seven new skies to **Shadered** by Noodlegamer76: Jupiter, Cat, Twilight, Hell, Nebula, Aurora and Snow.
+Adds six new skies to **Shadered** by Noodlegamer76: Jupiter, Cat, Twilight, Hell, Nebula and Golden Hour.
 They are added as real Shadered sky types, so everything in Shadered that works with sky types works with them:
 - Skyblock items (Jupiter Sky Block, ...) that place Shadered's own skyblock, drawn by Shadered's renderer.
 - Shadered's filters (posterize, grayscale, ...) on those skyblocks.
@@ -96,5 +96,4 @@ The Jupiter sky (tools/skies/jupiter_sky_block/) is a user-supplied cube map, as
 (some images, for example CC BY ones, require a credit line).
 
 - Nebula: `01_teal_magenta_nebula` from a "SpaceSkyboxes" pack (Godot cube-map export, 512x512 faces). Source/author/license: to be added.
-- Aurora (`aurora_green`) and Snow (`snow_falling`): from "PSX Skyboxes 2 (free)" (256x256 faces, upscaled 4x with
-  nearest-neighbour to keep the pixel look). Source/author/license: to be added.
+- Golden Hour: `02_golden_hour` from a "StylizedSkyboxes" pack (Godot cube-map export, 512x512 faces). Source/author/license: to be added.

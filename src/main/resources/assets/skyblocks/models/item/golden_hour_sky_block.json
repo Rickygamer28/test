@@ -1,7 +1,7 @@
 {
   "parent": "builtin/entity",
   "textures": {
-    "particle": "skyblocks:block/snow_sky_block"
+    "particle": "skyblocks:block/golden_hour_sky_block"
   },
   "display": {
     "gui": {

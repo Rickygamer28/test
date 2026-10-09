@@ -3,5 +3,4 @@ cat_sky_block
 twilight_sky_block
 hell_sky_block
 nebula_sky_block
-aurora_sky_block
-snow_sky_block
+golden_hour_sky_block

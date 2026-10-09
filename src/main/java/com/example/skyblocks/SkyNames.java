@@ -14,7 +14,7 @@ import java.util.Locale;
  *  - lang keys           skyblock_type.skyblocks.<name>, item.skyblocks.<name>_sky_block
  */
 public final class SkyNames {
-    public static final String[] NAMES = {"jupiter", "cat", "twilight", "hell", "nebula", "aurora", "snow"};
+    public static final String[] NAMES = {"jupiter", "cat", "twilight", "hell", "nebula", "golden_hour"};
 
     public static String enumName(int index) {
         return "SKYBLOCKS_" + NAMES[index].toUpperCase(Locale.ROOT);
