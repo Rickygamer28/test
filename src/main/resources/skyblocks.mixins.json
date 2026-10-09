@@ -4,6 +4,8 @@
   "package": "com.example.skyblocks.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "IrisSodiumProgramsMixin",
+    "IrisSodiumShaderMixin",
     "SodiumShaderInterfaceMixin",
     "SodiumShaderLoaderMixin"
   ],

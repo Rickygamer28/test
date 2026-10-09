@@ -34,3 +34,11 @@ type="optional"
 versionRange="*"
 ordering="NONE"
 side="CLIENT"
+
+# Optional: with Iris and a shader pack, sky blocks are patched into the pack's terrain shaders (best effort).
+[[dependencies.${mod_id}]]
+modId="iris"
+type="optional"
+versionRange="*"
+ordering="NONE"
+side="CLIENT"

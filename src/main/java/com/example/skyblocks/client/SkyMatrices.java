@@ -31,16 +31,15 @@ public final class SkyMatrices {
         // atlases from texture slots 3..8, so put them there every frame (items reuse those slots).
         SkyAtlas.bind();
 
-        ShaderInstance shader = SkyRenderTypes.skyItemShader;
-        if (shader == null) {
-            return;
-        }
-
         // Includes view bobbing, the same as the real sky, so item and sky stay in step.
         RenderSystem.getProjectionMatrix().invert(INV_PROJECTION);
         // Camera.rotation() turns view-space directions into world-space directions.
         VIEW_TO_WORLD.identity().rotation(event.getCamera().rotation());
 
+        ShaderInstance shader = SkyRenderTypes.skyItemShader;
+        if (shader == null) {
+            return;
+        }
         Uniform invProj = shader.getUniform("WorldProjInv");
         if (invProj != null) {
             invProj.set(INV_PROJECTION);
@@ -49,6 +48,16 @@ public final class SkyMatrices {
         if (viewToWorld != null) {
             viewToWorld.set(VIEW_TO_WORLD);
         }
+    }
+
+    /** World inverse projection of the current frame (also used by the Iris shader-pack patch). */
+    public static Matrix4f inverseProjection() {
+        return INV_PROJECTION;
+    }
+
+    /** Camera rotation of the current frame, view space to world space. */
+    public static Matrix3f viewToWorld() {
+        return VIEW_TO_WORLD;
     }
 
     private SkyMatrices() {}

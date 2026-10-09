@@ -40,16 +40,19 @@ public final class SodiumSkyBinder {
             GL20.glUniform2f(screen, window.getWidth(), window.getHeight());
         }
 
+        int previousUnit = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE);
         for (int i = 0; i < SkyAtlas.FACE_COUNT; i++) {
             int unit = FIRST_UNIT + i;
             GlStateManager._activeTexture(GL13.GL_TEXTURE0 + unit);
-            GlStateManager._bindTexture(SkyAtlas.textureId(i));
+            int texture = SkyAtlas.textureId(i);
+            GlStateManager._bindTexture(texture);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture); // in case GlStateManager's cache is stale
             int sampler = GL20.glGetUniformLocation(program, "Sampler" + (SkyAtlas.FIRST_SLOT + i));
             if (sampler >= 0) {
                 GL20.glUniform1i(sampler, unit);
             }
         }
-        GlStateManager._activeTexture(GL13.GL_TEXTURE0);
+        GlStateManager._activeTexture(previousUnit);
     }
 
     private SodiumSkyBinder() {}

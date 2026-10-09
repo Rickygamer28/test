@@ -54,6 +54,21 @@ Two optional mixins (`skyblocks.mixins.json`, only applied when Sodium is instal
 - `SodiumShaderInterfaceMixin` runs after Sodium sets up each terrain pass. It binds the sky atlases and the screen size,
   and turns the sky off in passes with blending (translucent), so stained glass and similar are never mistaken for a sky.
 
+Sodium warns about resource packs that replace `rendertype_solid`, because it never uses that shader.
+`pack.mcmeta` lists our two files under `sodium.ignored_shaders` (Sodium's own opt-out), so the warning
+doesn't appear. The override still works without Sodium.
+
+## Iris shader packs (best effort)
+With a shader pack on, Iris builds the terrain shaders from the pack's `gbuffers_terrain`. Two more optional mixins:
+- `IrisSodiumProgramsMixin` patches the solid and cutout terrain programs right before Iris compiles them
+  (compat/iris/IrisShaderPatch). The pack's `main()` is renamed and wrapped. The vertex side passes the atlas UV on,
+  and the fragment side replaces the pack's first colour output (location 0, usually albedo) with the sky where it
+  finds a marker. Shadow and water programs are not touched.
+- `IrisSodiumShaderMixin` binds the atlases and uniforms on the highest free texture units after Iris sets up each pass.
+The pack still lights, fogs and post-processes those pixels its own way, so the sky looks a bit different in every
+pack (darker at night or in caves, for example). Packs with geometry/tessellation terrain shaders, or without a
+location-0 output, are left unpatched (icon texture). The held/inventory item may not show the sky with a pack on.
+
 ## Framed Blocks
 Because the sky is part of the block's ordinary model and texture, a Framed Blocks frame that uses a sky block
 as camo copies those quads. The patched shader then draws the sky on it, on slopes, slabs, panels and so on,
@@ -61,9 +76,9 @@ with no Framed-specific code. Only the placed frame shows the sky; a framed bloc
 inventory shows the plain icon.
 
 ## Limitations
-- Works with the vanilla chunk renderer and with Sodium for NeoForge (tested against the 0.6.13 and 0.8.13 shader
-  sources for 1.21.1). Not supported: Embeddium, and Iris/Oculus while a shader pack is on. There the sky blocks
-  show their icon texture instead of the sky, but still work as normal blocks.
+- Works with the vanilla chunk renderer, with Sodium for NeoForge (checked against the 0.6.13 and 0.8.13 shader
+  sources for 1.21.1) and, best effort, with Iris shader packs (see below). Not supported: Embeddium. Oculus has no
+  1.21.1 version; on NeoForge 1.21.1 shader packs run through Iris itself.
 - Another mod or resource pack that also replaces `rendertype_solid` will conflict. Whichever one loads on top wins.
 - A solid-layer texture from another mod with a pixel alpha between about 150 and 244 would also be treated as
   a sky. Vanilla opaque textures are always 255.
