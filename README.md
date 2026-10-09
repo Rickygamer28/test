@@ -19,6 +19,8 @@ Shadered+ skies (blocks, ores, emitter settings) before removing the mod from a 
 - **OIIA Cat** (`skyblocks:oiia_cat`): a 3D cat that faces you when placed. Give it a **redstone signal** and it turns
   into the curled-up "loaf" shape and spins and bobs (the original model's animation, about 4.8 s loop) for as long as the
   signal lasts; without a signal it is the standing cat, still. Inventory shows a flat icon, hands/item frames the model.
+  It casts a round shadow on the floor like mobs do (Minecraft's own shadow texture; follows the "Entity Shadows" setting,
+  fades as the cat floats up while spinning).
 
 How it works: Shadered's model loader reads every `models/complex/` file of every mod, so our models live in
 `assets/skyblocks/models/complex/` (`oiia_cat.glb` and `oiia_cat_spin.glb`, converted from the original FBX in

@@ -49,8 +49,14 @@ final class OiiaCatModel {
         return renderable;
     }
 
-    /** Applies the "Take 001" animation (looping) at the given time in seconds, in model units. */
-    static void animate(PoseStack pose, float seconds) {
+    /** Lowest point of the loaf pose above the model origin, in model units (the loaf floats while it spins). */
+    static final float SPIN_BOTTOM = 7.35F;
+
+    /**
+     * Applies the "Take 001" animation (looping) at the given time in seconds, in model units.
+     * @return the animation's vertical offset at that time, in model units (used for the shadow)
+     */
+    static float animate(PoseStack pose, float seconds) {
         float[] time = OiiaCatAnimation.TIME;
         int last = time.length - 1;
         float start = time[0];
@@ -70,6 +76,7 @@ final class OiiaCatModel {
 
         pose.translate(0, y, 0);
         pose.mulPose(a.slerp(b, f).normalize());
+        return y;
     }
 
     private OiiaCatModel() {}
