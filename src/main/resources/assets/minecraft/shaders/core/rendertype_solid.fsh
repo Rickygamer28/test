@@ -1,14 +1,27 @@
 #version 150
 
-// Sky block as an item. The world camera comes from SkyMatrices (set once per frame), so the item
-// shows the sky in the direction the player is looking through that pixel.
+// Vanilla 1.21.1 rendertype_solid.fsh, patched by Shadered+ (skyblocks).
+// Everything vanilla does is unchanged, except: a texel whose alpha is a sky MARKER
+// (240 - 8*k, written by tools/build_sky_atlas.py into the sky block textures) is replaced by
+// sky number k, seen through the block like a window. Because this happens in the normal chunk
+// shader, it also works for anything that reuses the block's model, such as Framed Blocks camos.
 
-uniform vec2 ScreenSize;
+#moj_import <fog.glsl>
+
+uniform sampler2D Sampler0;
+
 uniform vec4 ColorModulator;
-uniform mat4 WorldProjInv;   // inverse of the WORLD projection
-uniform mat3 ViewToWorld;    // camera rotation: view space -> world space
+uniform float FogStart;
+uniform float FogEnd;
+uniform vec4 FogColor;
 
-flat in int skyLayer;
+uniform mat4 ModelViewMat;
+uniform mat4 ProjMat;
+uniform vec2 ScreenSize;
+
+in float vertexDistance;
+in vec4 vertexColor;
+in vec2 texCoord0;
 
 out vec4 fragColor;
 
@@ -113,8 +126,25 @@ vec4 sky_color(vec3 d, int layer) {
 // ------------------------------- end of shared sky lookup ------------------------------------
 
 void main() {
-    vec2 ndc = gl_FragCoord.xy / ScreenSize * 2.0 - 1.0;
-    vec4 p = WorldProjInv * vec4(ndc, 1.0, 1.0);
-    vec3 d = normalize(ViewToWorld * (p.xyz / p.w));
-    fragColor = vec4(sky_color(d, clamp(skyLayer, 0, max(sky_layers() - 1, 0))).rgb * ColorModulator.rgb, 1.0);
+    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
+
+    // Exact (unfiltered, mip 0) texel of the block atlas under this pixel.
+    ivec2 atlasSize = textureSize(Sampler0, 0);
+    ivec2 texel = clamp(ivec2(texCoord0 * vec2(atlasSize)), ivec2(0), atlasSize - ivec2(1));
+    float marker = texelFetch(Sampler0, texel, 0).a * 255.0;
+    // Marker 240 - 8k, accepted within +-4.  Normal opaque textures have alpha 255.
+    int layer = int(floor((244.0 - marker) / 8.0));
+
+    if (marker <= 244.0 && layer >= 0 && layer < sky_layers()) {
+        // World-space direction through this pixel. ProjMat includes view bobbing, so using the
+        // pixel (not the vertex) keeps the sky steady while walking. ModelViewMat is the camera
+        // rotation; its transpose turns view space into world space.
+        vec2 ndc = gl_FragCoord.xy / ScreenSize * 2.0 - 1.0;
+        vec4 p = inverse(ProjMat) * vec4(ndc, 1.0, 1.0);
+        vec3 d = normalize(transpose(mat3(ModelViewMat)) * (p.xyz / p.w));
+        fragColor = sky_color(d, layer);
+        return;
+    }
+
+    fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
 }

@@ -27,6 +27,10 @@ public final class SkyMatrices {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) {
             return;
         }
+        // The terrain is drawn right after this stage. The patched solid-block shader reads the sky
+        // atlases from texture slots 3..8, so put them there every frame (items reuse those slots).
+        SkyAtlas.bind();
+
         ShaderInstance shader = SkyRenderTypes.skyItemShader;
         if (shader == null) {
             return;

@@ -18,6 +18,16 @@ import org.joml.Matrix4f;
  */
 public class SkyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
 
+    // 4 corners per face: DOWN, UP, NORTH, SOUTH, WEST, EAST
+    private static final float[][][] FACES = {
+            {{0, 0, 0}, {1, 0, 0}, {1, 0, 1}, {0, 0, 1}},
+            {{0, 1, 0}, {0, 1, 1}, {1, 1, 1}, {1, 1, 0}},
+            {{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}},
+            {{0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}},
+            {{0, 0, 0}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}},
+            {{1, 0, 0}, {1, 1, 0}, {1, 1, 1}, {1, 0, 1}}
+    };
+
     public SkyBlockItemRenderer() {
         super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
     }
@@ -31,12 +41,13 @@ public class SkyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
             return;
         }
 
-        VertexConsumer consumer = buffer.getBuffer(SkyRenderTypes.skyItem(skyBlock.getSkyFaces()));
+        VertexConsumer consumer = buffer.getBuffer(SkyRenderTypes.SKY_ITEM);
         Matrix4f pose = poseStack.last().pose();
+        int index = skyBlock.getSkyIndex();   // read back by sky_item.vsh from the red channel
 
-        for (float[][] face : SkyBlockRenderer.FACES) {
+        for (float[][] face : FACES) {
             for (float[] v : face) {
-                consumer.addVertex(pose, v[0], v[1], v[2]);
+                consumer.addVertex(pose, v[0], v[1], v[2]).setColor(index, 0, 0, 255);
             }
         }
     }

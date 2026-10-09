@@ -3,15 +3,6 @@
     "fragment": "skyblocks:sky_item",
     "samplers": [
         {
-            "name": "Sampler0"
-        },
-        {
-            "name": "Sampler1"
-        },
-        {
-            "name": "Sampler2"
-        },
-        {
             "name": "Sampler3"
         },
         {
@@ -19,6 +10,15 @@
         },
         {
             "name": "Sampler5"
+        },
+        {
+            "name": "Sampler6"
+        },
+        {
+            "name": "Sampler7"
+        },
+        {
+            "name": "Sampler8"
         }
     ],
     "uniforms": [

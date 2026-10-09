@@ -1,30 +1,23 @@
 package com.example.skyblocks;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
 /**
- * A full cube that is drawn by a BlockEntityRenderer instead of the chunk mesh,
- * so the renderer can use our custom skybox shader.
+ * A plain, solid, full cube with a normal block model. It has no block entity and no special
+ * renderer: the sky is drawn by the patched vanilla chunk shader
+ * (assets/minecraft/shaders/core/rendertype_solid.fsh), which recognises the block's texture by its
+ * marker alpha. Because of that, anything that copies the block's model (for example Framed Blocks
+ * camos) shows the sky too.
  */
-public class SkyBlock extends Block implements EntityBlock {
-    public static final MapCodec<SkyBlock> CODEC = simpleCodec(SkyBlock::new);
+public class SkyBlock extends Block {
+    public static final MapCodec<SkyBlock> CODEC = simpleCodec(p -> new SkyBlock(p, 0));
 
-    /** Cube-map face suffixes, in the order of the shader's Sampler0..Sampler5. */
-    public static final String[] FACE_SUFFIXES = {"px", "nx", "py", "ny", "pz", "nz"};
+    private final int skyIndex;
 
-    private ResourceLocation[] skyFaces;
-
-    public SkyBlock(Properties properties) {
+    public SkyBlock(Properties properties, int skyIndex) {
         super(properties);
+        this.skyIndex = skyIndex;
     }
 
     @Override
@@ -32,28 +25,8 @@ public class SkyBlock extends Block implements EntityBlock {
         return CODEC;
     }
 
-    @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
-    }
-
-    @Nullable
-    @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new SkyBlockEntity(pos, state);
-    }
-
-    /** textures/sky/<registry_name>_px|nx|py|ny|pz|nz.png (resolved lazily, after registration). */
-    public ResourceLocation[] getSkyFaces() {
-        if (skyFaces == null) {
-            ResourceLocation key = BuiltInRegistries.BLOCK.getKey(this);
-            ResourceLocation[] faces = new ResourceLocation[FACE_SUFFIXES.length];
-            for (int i = 0; i < faces.length; i++) {
-                faces[i] = ResourceLocation.fromNamespaceAndPath(
-                        key.getNamespace(), "textures/sky/" + key.getPath() + "_" + FACE_SUFFIXES[i] + ".png");
-            }
-            skyFaces = faces;
-        }
-        return skyFaces;
+    /** Which sky of the atlases this block shows (line of tools/skies/order.txt, from 0). */
+    public int getSkyIndex() {
+        return skyIndex;
     }
 }

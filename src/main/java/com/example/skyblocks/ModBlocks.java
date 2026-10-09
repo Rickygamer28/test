@@ -20,16 +20,16 @@ public final class ModBlocks {
                 .requiresCorrectToolForDrops();
     }
 
-    // The registry name decides which texture is projected:
-    // assets/skyblocks/textures/sky/<registry_name>.png
+    // The number is the sky INDEX: the line of tools/skies/order.txt (counting from 0).
+    // It picks the sky in the atlases and must match the marker alpha in the block's texture.
     public static final DeferredBlock<SkyBlock> JUPITER_SKY =
-            BLOCKS.registerBlock("jupiter_sky_block", SkyBlock::new, props(MapColor.COLOR_BROWN));
+            BLOCKS.registerBlock("jupiter_sky_block", p -> new SkyBlock(p, 0), props(MapColor.COLOR_BROWN));
     public static final DeferredBlock<SkyBlock> CAT_SKY =
-            BLOCKS.registerBlock("cat_sky_block", SkyBlock::new, props(MapColor.COLOR_ORANGE));
+            BLOCKS.registerBlock("cat_sky_block", p -> new SkyBlock(p, 1), props(MapColor.COLOR_ORANGE));
     public static final DeferredBlock<SkyBlock> TWILIGHT_SKY =
-            BLOCKS.registerBlock("twilight_sky_block", SkyBlock::new, props(MapColor.COLOR_PINK));
+            BLOCKS.registerBlock("twilight_sky_block", p -> new SkyBlock(p, 2), props(MapColor.COLOR_PINK));
     public static final DeferredBlock<SkyBlock> HELL_SKY =
-            BLOCKS.registerBlock("hell_sky_block", SkyBlock::new, props(MapColor.COLOR_RED));
+            BLOCKS.registerBlock("hell_sky_block", p -> new SkyBlock(p, 3), props(MapColor.COLOR_RED));
 
     public static final DeferredItem<BlockItem> JUPITER_SKY_ITEM =
             ITEMS.registerSimpleBlockItem("jupiter_sky_block", JUPITER_SKY);

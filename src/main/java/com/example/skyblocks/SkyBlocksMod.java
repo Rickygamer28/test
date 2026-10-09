@@ -28,7 +28,6 @@ public class SkyBlocksMod {
     public SkyBlocksMod(IEventBus modEventBus) {
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlocks.ITEMS.register(modEventBus);
-        ModBlockEntities.TYPES.register(modEventBus);
         CREATIVE_TABS.register(modEventBus);
     }
 }
