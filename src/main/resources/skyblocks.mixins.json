@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.example.skyblocks.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "SkyblockItemTypesInvoker",
+    "SkyblockItemTypesMixin",
+    "SkyblockRegistryMixin",
+    "SkyblockTypeInvoker",
+    "SkyblockTypeMixin"
+  ],
+  "client": [
+    "ModRenderTypesMixin",
+    "SkyblockEntityRendererMixin",
+    "SkyblockRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

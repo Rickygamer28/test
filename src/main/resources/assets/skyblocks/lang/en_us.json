@@ -1,6 +1,10 @@
 {
-  "block.skyblocks.jupiter_sky_block": "Jupiter Sky Block",
-  "block.skyblocks.cat_sky_block": "Cat Sky Block",
-  "block.skyblocks.twilight_sky_block": "Twilight Sky Block",
-  "block.skyblocks.hell_sky_block": "Hell Sky Block"
+  "item.skyblocks.jupiter_sky_block": "Jupiter Sky Block",
+  "skyblock_type.skyblocks.jupiter": "Jupiter",
+  "item.skyblocks.cat_sky_block": "Cat Sky Block",
+  "skyblock_type.skyblocks.cat": "Cat",
+  "item.skyblocks.twilight_sky_block": "Twilight Sky Block",
+  "skyblock_type.skyblocks.twilight": "Twilight",
+  "item.skyblocks.hell_sky_block": "Hell Sky Block",
+  "skyblock_type.skyblocks.hell": "Hell"
 }
