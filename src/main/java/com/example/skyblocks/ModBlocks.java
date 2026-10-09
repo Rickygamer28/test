@@ -16,9 +16,9 @@ public final class ModBlocks {
 
     /**
      * The skies, IN THE ORDER of tools/skies/order.txt (position = sky index).
-     * Registry name of each block: <name>_sky_block.
+     * Registry name of each block: <name>_sky_block; skybox faces: textures/environment/<name>/.
      */
-    private static final String[] SKY_NAMES = {"jupiter", "cat", "twilight", "hell"};
+    public static final String[] SKY_NAMES = {"jupiter", "cat", "twilight", "hell"};
     private static final MapColor[] SKY_COLORS = {
             MapColor.COLOR_BROWN, MapColor.COLOR_ORANGE, MapColor.COLOR_PINK, MapColor.COLOR_RED};
 

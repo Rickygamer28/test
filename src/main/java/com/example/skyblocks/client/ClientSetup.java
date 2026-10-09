@@ -1,35 +1,31 @@
 package com.example.skyblocks.client;
 
+import com.example.skyblocks.ModBlockEntities;
+import com.example.skyblocks.ModBlocks;
 import com.example.skyblocks.SkyBlocksMod;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import java.io.IOException;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.RegisterShadersEvent;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import com.example.skyblocks.ModBlocks;
-import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.registries.DeferredItem;
 
 @EventBusSubscriber(modid = SkyBlocksMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientSetup {
 
+    /** Add our skies to Shadered's renderer (Shadered adds its own in its client setup). */
     @SubscribeEvent
-    public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        // Placed blocks need no shader of their own: they are drawn by the patched vanilla
-        // assets/minecraft/shaders/core/rendertype_solid.* (a resource override, no code needed).
+    public static void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(ShaderedSkies::register);
+    }
 
-        // assets/skyblocks/shaders/core/sky_item.json (+ .vsh / .fsh)
-        event.registerShader(
-                new ShaderInstance(event.getResourceProvider(),
-                        ResourceLocation.fromNamespaceAndPath(SkyBlocksMod.MOD_ID, "sky_item"),
-                        DefaultVertexFormat.POSITION_COLOR),
-                shader -> SkyRenderTypes.skyItemShader = shader);
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModBlockEntities.SKY_BLOCK.get(), SkyBlockRenderer::new);
     }
 
     @SubscribeEvent

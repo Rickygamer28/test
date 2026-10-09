@@ -20,6 +20,21 @@ neoForge {
     }
 }
 
+repositories {
+    // Shadered is downloaded from Modrinth's maven at build time.
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+}
+
+dependencies {
+    // Shadered+ is an addon: it compiles against Shadered and needs Shadered (and Shadered's own
+    // dependencies, e.g. GeckoLib and Sodium) installed in the game. Not bundled into our jar.
+    compileOnly "maven.modrinth:shadered:${shadered_version}"
+}
+
 tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [mod_id: mod_id, mod_version: mod_version]
     inputs.properties replaceProperties

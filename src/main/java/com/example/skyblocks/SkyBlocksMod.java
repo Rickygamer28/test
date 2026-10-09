@@ -1,33 +1,32 @@
 package com.example.skyblocks;
 
-import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 @Mod(SkyBlocksMod.MOD_ID)
 public class SkyBlocksMod {
     public static final String MOD_ID = "skyblocks";
 
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
-
-    /** The "Shadered+" creative tab. Every item registered in ModBlocks.ITEMS is listed automatically. */
-    public static final Supplier<CreativeModeTab> SHADERED_PLUS_TAB = CREATIVE_TABS.register("shadered_plus",
-            () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup." + MOD_ID))
-                    .icon(() -> new ItemStack(ModBlocks.SKY_BLOCK_ITEMS.get(0).get()))
-                    .displayItems((parameters, output) ->
-                            ModBlocks.ITEMS.getEntries().forEach(entry -> output.accept(entry.get())))
-                    .build());
+    /** Shadered's creative tab (shadered:shadered_tab). Our blocks are listed there, after Shadered's items. */
+    public static final ResourceKey<CreativeModeTab> SHADERED_TAB = ResourceKey.create(
+            Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath("shadered", "shadered_tab"));
 
     public SkyBlocksMod(IEventBus modEventBus) {
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlocks.ITEMS.register(modEventBus);
-        CREATIVE_TABS.register(modEventBus);
+        ModBlockEntities.TYPES.register(modEventBus);
+        modEventBus.addListener(SkyBlocksMod::addToShaderedTab);
+    }
+
+    /** Every item registered in ModBlocks.ITEMS is added to Shadered's tab automatically. */
+    private static void addToShaderedTab(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey().equals(SHADERED_TAB)) {
+            ModBlocks.ITEMS.getEntries().forEach(entry -> event.accept(entry.get()));
+        }
     }
 }
