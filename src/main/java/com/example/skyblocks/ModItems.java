@@ -4,6 +4,7 @@ import com.noodlegamer76.shadered.block.InitBlocks;
 import com.noodlegamer76.shadered.item.SkyblockItem;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -24,6 +25,9 @@ public final class ModItems {
                     () -> new SkyblockItem(InitBlocks.SKYBLOCK.get(), new Item.Properties(), SkyTypes.itemType(index))));
         }
     }
+
+    /** The OIIA cat model block (its renderer is registered in client/ClientSetup). */
+    public static final DeferredItem<BlockItem> OIIA_CAT = ITEMS.registerSimpleBlockItem("oiia_cat", ModBlocks.OIIA_CAT);
 
     private ModItems() {}
 }

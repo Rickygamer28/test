@@ -24,7 +24,9 @@ public class SkyBlocksMod {
             Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath("shadered", "shadered_tab"));
 
     public SkyBlocksMod(IEventBus modEventBus) {
+        ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        ModBlockEntities.TYPES.register(modEventBus);
         modEventBus.addListener(SkyBlocksMod::addToShaderedTab);
     }
 
@@ -36,5 +38,6 @@ public class SkyBlocksMod {
         for (int i = 0; i < ModItems.SKY_ITEMS.size(); i++) {
             event.accept(SkyblockHolderBlockItem.create(SkyTypes.type(i), SkyblockPass.NORMAL, ModItems.SKY_ITEMS.get(i).get()));
         }
+        event.accept(ModItems.OIIA_CAT.get());
     }
 }

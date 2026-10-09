@@ -15,6 +15,20 @@ Recipes (shapeless): Jupiter = Glass + Amethyst Shard, Cat = Glass + Raw Cod, Tw
 **Removing Shadered+ from a world:** Shadered can't load blocks whose sky type no longer exists. Break all
 Shadered+ skies (blocks, ores, emitter settings) before removing the mod from a world.
 
+## Models (like Shadered's Maxwell)
+- **OIIA Cat** (`skyblocks:oiia_cat`): a 3D cat that faces you when placed. Give it a **redstone signal** and it plays
+  its own spin-and-bob animation (from the model file, about 4.8 s loop) from the start, for as long as the signal lasts;
+  without a signal it stands still. Inventory shows a flat icon, hands/item frames show the model.
+
+How it works: Shadered's model loader reads every `models/complex/` file of every mod, so our models live in
+`assets/skyblocks/models/complex/` (here `oiia_cat.glb`, converted from the original FBX in `tools/models/oiia_cat/`
+with the texture embedded and reduced to 1024x1024). `OiiaCatRenderer` hands the model to Shadered's model renderer,
+like Shadered's `MaxwellRenderer`. Shadered's animator only animates skeletons, and this model animates as a whole, so
+`OiiaCatModel.animate` plays the file's keyframes (`OiiaCatAnimation`) itself.
+
+To add another model: put the .glb in `models/complex/`, then copy the OIIA Cat block, block entity, renderers,
+blockstate/models/loot/lang and adjust the scale. Models with a skeleton can use Shadered's `Animator` instead.
+
 ## Build
 Requires JDK 21 and internet access (Gradle downloads NeoForge, Shadered from Modrinth's maven, and GeckoLib).
     gradle wrapper --gradle-version 8.10.2
@@ -65,6 +79,10 @@ Requires and builds on **Shadered** by Noodlegamer76 (https://github.com/Noodleg
 permission. Shadered+ is an unofficial addon. It patches Shadered's classes at runtime (mixins) and contains no copied
 Shadered code or assets. If Shadered code or assets are copied in later: credit Noodlegamer76, link the license,
 say what was changed, no commercial use, and keep the original artists' credits for any skybox images.
+
+## Model credit
+OIIA Cat: the "Oiiaioooooiai" cat model (file `OiiaioooooiaiFin.fbx`, texture `Muchkin2_BaseColor.png`) was supplied
+by the user. Add its source, author and license here (most Sketchfab models require a credit line).
 
 ## Image credit
 The Jupiter sky (tools/skies/jupiter_sky_block/) is a user-supplied cube map, as are the Cat panorama
