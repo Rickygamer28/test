@@ -27,9 +27,10 @@ Each sky is a cube map: six square face images `px nx py ny pz nz` (+X, -X, +Y u
 3. Add `<block_name>` as a new last line of `tools/skies/order.txt`. Its line number (from 0) is the sky index.
 4. Run `python tools/build_sky_atlas.py`. It rebuilds `textures/sky/atlas_*.png` and writes the
    marker alpha into every icon. Run it again after any change to a sky or an icon.
-5. Copy the blockstate, block model, item model, loot table, recipe and lang entry of an existing block.
-6. Register it in ModBlocks with `p -> new SkyBlock(p, <index>)`, and add it to the pickaxe tag and to the
-   item extensions list in ClientSetup. (The creative tab picks it up automatically.) Up to 12 skies.
+5. Copy the blockstate, block model, item model, loot table and recipe of an existing sky block, add its lang
+   name and add it to the pickaxe tag.
+6. Add the name and a map color to SKY_NAMES / SKY_COLORS in ModBlocks, in the same position as in order.txt.
+   The item renderer and the creative tab entry follow automatically. Up to 12 skies.
 
 ## How it works
 - Sky blocks are ordinary solid cubes with a normal `cube_all` model. No block entity, no special renderer.
@@ -44,6 +45,15 @@ Each sky is a cube map: six square face images `px nx py ny pz nz` (+X, -X, +Y u
 - Once per frame (RenderLevelStageEvent AFTER_SKY, just before the terrain), SkyAtlas puts the atlases into
   texture slots 3..8.
 
+## Sodium
+Sodium reads its terrain shader straight from its own jar, so the resource override above can't reach it.
+Two optional mixins (`skyblocks.mixins.json`, only applied when Sodium is installed) handle it instead:
+- `SodiumShaderLoaderMixin` patches `sodium:blocks/block_layer_opaque.fsh` as Sodium loads it
+  (compat/sodium/SodiumShaderPatch adds the same marker check and sky lookup, from shaders/sodium/sky_lookup.glsl).
+  If the shader doesn't look as expected, it is left untouched.
+- `SodiumShaderInterfaceMixin` runs after Sodium sets up each terrain pass. It binds the sky atlases and the screen size,
+  and turns the sky off in passes with blending (translucent), so stained glass and similar are never mistaken for a sky.
+
 ## Framed Blocks
 Because the sky is part of the block's ordinary model and texture, a Framed Blocks frame that uses a sky block
 as camo copies those quads. The patched shader then draws the sky on it, on slopes, slabs, panels and so on,
@@ -51,8 +61,9 @@ with no Framed-specific code. Only the placed frame shows the sky; a framed bloc
 inventory shows the plain icon.
 
 ## Limitations
-- Needs the vanilla chunk renderer. With Sodium/Embeddium (they use their own chunk shaders) or an Iris/Oculus
-  shader pack, sky blocks show their icon texture instead of the sky. They still work as normal blocks.
+- Works with the vanilla chunk renderer and with Sodium for NeoForge (tested against the 0.6.13 and 0.8.13 shader
+  sources for 1.21.1). Not supported: Embeddium, and Iris/Oculus while a shader pack is on. There the sky blocks
+  show their icon texture instead of the sky, but still work as normal blocks.
 - Another mod or resource pack that also replaces `rendertype_solid` will conflict. Whichever one loads on top wins.
 - A solid-layer texture from another mod with a pixel alpha between about 150 and 244 would also be treated as
   a sky. Vanilla opaque textures are always 255.

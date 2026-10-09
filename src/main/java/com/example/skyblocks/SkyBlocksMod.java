@@ -20,7 +20,7 @@ public class SkyBlocksMod {
     public static final Supplier<CreativeModeTab> SHADERED_PLUS_TAB = CREATIVE_TABS.register("shadered_plus",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + MOD_ID))
-                    .icon(() -> new ItemStack(ModBlocks.JUPITER_SKY_ITEM.get()))
+                    .icon(() -> new ItemStack(ModBlocks.SKY_BLOCK_ITEMS.get(0).get()))
                     .displayItems((parameters, output) ->
                             ModBlocks.ITEMS.getEntries().forEach(entry -> output.accept(entry.get())))
                     .build());

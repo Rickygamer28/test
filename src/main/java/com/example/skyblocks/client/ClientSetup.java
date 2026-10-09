@@ -11,6 +11,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import com.example.skyblocks.ModBlocks;
+import net.minecraft.world.item.Item;
+import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
@@ -42,8 +44,7 @@ public final class ClientSetup {
                 }
                 return renderer;
             }
-        }, ModBlocks.JUPITER_SKY_ITEM.get(), ModBlocks.CAT_SKY_ITEM.get(),
-                ModBlocks.TWILIGHT_SKY_ITEM.get(), ModBlocks.HELL_SKY_ITEM.get());
+        }, ModBlocks.SKY_BLOCK_ITEMS.stream().map(DeferredItem::get).toArray(Item[]::new));
     }
 
     private ClientSetup() {}

@@ -1,5 +1,7 @@
 package com.example.skyblocks;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -12,33 +14,35 @@ public final class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(SkyBlocksMod.MOD_ID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyBlocksMod.MOD_ID);
 
-    private static BlockBehaviour.Properties props(MapColor color) {
+    /**
+     * The skies, IN THE ORDER of tools/skies/order.txt (position = sky index).
+     * Registry name of each block: <name>_sky_block.
+     */
+    private static final String[] SKY_NAMES = {"jupiter", "cat", "twilight", "hell"};
+    private static final MapColor[] SKY_COLORS = {
+            MapColor.COLOR_BROWN, MapColor.COLOR_ORANGE, MapColor.COLOR_PINK, MapColor.COLOR_RED};
+
+    public static final List<DeferredBlock<SkyBlock>> SKY_BLOCKS = new ArrayList<>();
+    public static final List<DeferredItem<BlockItem>> SKY_BLOCK_ITEMS = new ArrayList<>();
+
+    static {
+        for (int i = 0; i < SKY_NAMES.length; i++) {
+            final int index = i;
+            String id = SKY_NAMES[i] + "_sky_block";
+            DeferredBlock<SkyBlock> block =
+                    BLOCKS.registerBlock(id, p -> new SkyBlock(p, index), skyProps(SKY_COLORS[i]));
+            SKY_BLOCKS.add(block);
+            SKY_BLOCK_ITEMS.add(ITEMS.registerSimpleBlockItem(id, block));
+        }
+    }
+
+    private static BlockBehaviour.Properties skyProps(MapColor color) {
         return BlockBehaviour.Properties.of()
                 .mapColor(color)
                 .strength(1.5F, 6.0F)
                 .sound(SoundType.GLASS)
                 .requiresCorrectToolForDrops();
     }
-
-    // The number is the sky INDEX: the line of tools/skies/order.txt (counting from 0).
-    // It picks the sky in the atlases and must match the marker alpha in the block's texture.
-    public static final DeferredBlock<SkyBlock> JUPITER_SKY =
-            BLOCKS.registerBlock("jupiter_sky_block", p -> new SkyBlock(p, 0), props(MapColor.COLOR_BROWN));
-    public static final DeferredBlock<SkyBlock> CAT_SKY =
-            BLOCKS.registerBlock("cat_sky_block", p -> new SkyBlock(p, 1), props(MapColor.COLOR_ORANGE));
-    public static final DeferredBlock<SkyBlock> TWILIGHT_SKY =
-            BLOCKS.registerBlock("twilight_sky_block", p -> new SkyBlock(p, 2), props(MapColor.COLOR_PINK));
-    public static final DeferredBlock<SkyBlock> HELL_SKY =
-            BLOCKS.registerBlock("hell_sky_block", p -> new SkyBlock(p, 3), props(MapColor.COLOR_RED));
-
-    public static final DeferredItem<BlockItem> JUPITER_SKY_ITEM =
-            ITEMS.registerSimpleBlockItem("jupiter_sky_block", JUPITER_SKY);
-    public static final DeferredItem<BlockItem> CAT_SKY_ITEM =
-            ITEMS.registerSimpleBlockItem("cat_sky_block", CAT_SKY);
-    public static final DeferredItem<BlockItem> TWILIGHT_SKY_ITEM =
-            ITEMS.registerSimpleBlockItem("twilight_sky_block", TWILIGHT_SKY);
-    public static final DeferredItem<BlockItem> HELL_SKY_ITEM =
-            ITEMS.registerSimpleBlockItem("hell_sky_block", HELL_SKY);
 
     private ModBlocks() {}
 }

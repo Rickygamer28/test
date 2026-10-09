@@ -2,8 +2,15 @@
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    { "item": "minecraft:glass" },
-    { "item": "minecraft:cod" }
+    {
+      "item": "minecraft:glass"
+    },
+    {
+      "item": "minecraft:cod"
+    }
   ],
-  "result": { "id": "skyblocks:cat_sky_block", "count": 1 }
+  "result": {
+    "id": "skyblocks:cat_sky_block",
+    "count": 1
+  }
 }

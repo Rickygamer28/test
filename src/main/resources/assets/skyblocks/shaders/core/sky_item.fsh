@@ -14,7 +14,8 @@ out vec4 fragColor;
 
 // ---------------------------------------------------------------------------------------------
 // Shadered+ sky lookup. The SAME block of code is in skyblocks:shaders/core/sky_item.fsh and
-// minecraft:shaders/core/rendertype_solid.fsh; keep them identical.
+// minecraft:shaders/core/rendertype_solid.fsh
+// and skyblocks:shaders/sodium/sky_lookup.glsl (spliced into Sodium's chunk shader); keep them identical.
 //
 // Sampler3..Sampler8 are the sky atlases for the cube faces +X -X +Y -Y +Z -Z.
 // Each atlas is S wide and S*N tall: sky number k is the square at rows [k*S, (k+1)*S).

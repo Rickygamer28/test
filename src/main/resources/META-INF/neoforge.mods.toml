@@ -10,6 +10,9 @@ description='''Decorative blocks that project a skybox onto their faces using a 
 
 Unofficial: not made by or affiliated with the Shadered mod or its author.'''
 
+[[mixins]]
+config="skyblocks.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId="neoforge"
 type="required"
@@ -23,3 +26,11 @@ type="required"
 versionRange="[1.21.1]"
 ordering="NONE"
 side="BOTH"
+
+# Optional: when Sodium is installed, sky blocks are drawn through its terrain shader too.
+[[dependencies.${mod_id}]]
+modId="sodium"
+type="optional"
+versionRange="*"
+ordering="NONE"
+side="CLIENT"

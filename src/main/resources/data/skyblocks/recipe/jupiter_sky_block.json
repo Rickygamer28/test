@@ -2,8 +2,15 @@
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    { "item": "minecraft:glass" },
-    { "item": "minecraft:amethyst_shard" }
+    {
+      "item": "minecraft:glass"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    }
   ],
-  "result": { "id": "skyblocks:jupiter_sky_block", "count": 1 }
+  "result": {
+    "id": "skyblocks:jupiter_sky_block",
+    "count": 1
+  }
 }
