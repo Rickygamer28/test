@@ -20,3 +20,10 @@
   SkyblockItems. Illusorite ore veins therefore include our skies automatically (this replaces the earlier "every sky
   gets ores" rule: new skies get Illusorite ores for free). Our own blocks, ores and Sky Emitter patches were removed.
 - 2026-10-09: added OIIA Cat model block (user-supplied FBX -> tools/models/oiia_cat, converted to models/complex/oiia_cat.glb). Model credit/licence still needed from the user.
+
+## Skies added 9 Oct 2026: nebula, aurora, snow
+- Nebula = SpaceSkyboxes `01_teal_magenta_nebula` (Godot export, labels correct as-is).
+- Aurora = psx-skyboxes-2-free `aurora_green`, Snow = `snow_falling` (256 px, paletted; converted to RGB, upscaled 4x
+  nearest). Labels checked with a rendered panorama: correct as-is (seam metric is noisy because of the dithering).
+- Credits/licenses for both packs still needed from the user.
+- No sky block recipes (removed 9 Oct 2026): skies come from Shadered's Illusorite ores. Don't add recipes for future skies.

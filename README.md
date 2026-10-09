@@ -1,6 +1,6 @@
 # Shadered+ (NeoForge 1.21.1): an addon for Shadered
 
-Adds four new skies to **Shadered** by Noodlegamer76: Jupiter, Cat, Twilight and Hell.
+Adds seven new skies to **Shadered** by Noodlegamer76: Jupiter, Cat, Twilight, Hell, Nebula, Aurora and Snow.
 They are added as real Shadered sky types, so everything in Shadered that works with sky types works with them:
 - Skyblock items (Jupiter Sky Block, ...) that place Shadered's own skyblock, drawn by Shadered's renderer.
 - Shadered's filters (posterize, grayscale, ...) on those skyblocks.
@@ -10,7 +10,7 @@ They are added as real Shadered sky types, so everything in Shadered that works 
 
 **Requires Shadered for 1.21.1** (built against 1.21.1-1.5.8, https://modrinth.com/mod/shadered) and everything
 Shadered itself needs (GeckoLib, Sodium, ...). Our skyblock items are listed in Shadered's creative tab.
-Recipes (shapeless): Jupiter = Glass + Amethyst Shard, Cat = Glass + Raw Cod, Twilight = Glass + Pink Dye, Hell = Glass + Nether Wart.
+Our skies have no crafting recipes: like Shadered's own skies, you get them from Illusorite ore veins.
 
 **Removing Shadered+ from a world:** Shadered can't load blocks whose sky type no longer exists. Break all
 Shadered+ skies (blocks, ores, emitter settings) before removing the mod from a world.
@@ -19,6 +19,8 @@ Shadered+ skies (blocks, ores, emitter settings) before removing the mod from a 
 - **OIIA Cat** (`skyblocks:oiia_cat`): a 3D cat that faces you when placed. Give it a **redstone signal** and it turns
   into the curled-up "loaf" shape and spins and bobs (the original model's animation, about 4.8 s loop) for as long as the
   signal lasts; without a signal it is the standing cat, still. Inventory shows a flat icon, hands/item frames the model.
+  Recipe (shaped, like Maxwell's): gray wool / light gray wool frame around a Diamond Block
+  (top `G L G`, middle `L D L`, bottom `G G G`; G = Gray Wool, L = Light Gray Wool, D = Diamond Block).
   It casts a round shadow on the floor like mobs do (Minecraft's own shadow texture; follows the "Entity Shadows" setting,
   fades as the cat floats up while spinning).
 
@@ -70,7 +72,7 @@ with a mixin error, and the mixins need updating.
    `textures/environment/<name>/` (front/back/left/right/top/bottom, matching Shadered's default SkyboxTranslation).
 4. Add `<name>` to `SkyNames.NAMES`, in the same position as in order.txt.
 5. Add a 16x16 icon `textures/block/<name>_sky_block.png` (particle texture), an item model (copy one),
-   lang entries `item.skyblocks.<name>_sky_block` and `skyblock_type.skyblocks.<name>`, and optionally a recipe.
+   lang entries `item.skyblocks.<name>_sky_block` and `skyblock_type.skyblocks.<name>` (no recipe: skies come from the ores).
    It then automatically becomes a Shadered sky type: skyblock, Sky Emitter, filters, Illusorite ore veins.
 
 ## Limitations
@@ -92,3 +94,7 @@ by the user. Add its source, author and license here (most Sketchfab models requ
 The Jupiter sky (tools/skies/jupiter_sky_block/) is a user-supplied cube map, as are the Cat panorama
 (tools/source/cat_sky_block.png), the Twilight cube map and the Hell cube map. Add each source, author and license here
 (some images, for example CC BY ones, require a credit line).
+
+- Nebula: `01_teal_magenta_nebula` from a "SpaceSkyboxes" pack (Godot cube-map export, 512x512 faces). Source/author/license: to be added.
+- Aurora (`aurora_green`) and Snow (`snow_falling`): from "PSX Skyboxes 2 (free)" (256x256 faces, upscaled 4x with
+  nearest-neighbour to keep the pixel look). Source/author/license: to be added.

@@ -7,5 +7,11 @@
   "skyblock_type.skyblocks.twilight": "Twilight",
   "item.skyblocks.hell_sky_block": "Hell Sky Block",
   "skyblock_type.skyblocks.hell": "Hell",
+  "item.skyblocks.nebula_sky_block": "Nebula Sky Block",
+  "skyblock_type.skyblocks.nebula": "Nebula",
+  "item.skyblocks.aurora_sky_block": "Aurora Sky Block",
+  "skyblock_type.skyblocks.aurora": "Aurora",
+  "item.skyblocks.snow_sky_block": "Snow Sky Block",
+  "skyblock_type.skyblocks.snow": "Snow",
   "block.skyblocks.oiia_cat": "OIIA Cat"
 }
