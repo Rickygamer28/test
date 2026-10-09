@@ -23,13 +23,19 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
     @Override
     public void render(OiiaCatBlockEntity be, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        boolean powered = be.getBlockState().getValue(OiiaCatBlock.POWERED);
+
+        // Without a signal: the standing cat. With a signal: the loaf pose, spinning (like the original animation).
         if (!(be.clientModel instanceof RenderableModel)) {
-            be.clientModel = OiiaCatModel.create();
-            if (be.clientModel == null) {
-                return;
-            }
+            be.clientModel = OiiaCatModel.create(OiiaCatModel.MODEL);
         }
-        RenderableModel model = (RenderableModel) be.clientModel;
+        if (!(be.clientSpinModel instanceof RenderableModel)) {
+            be.clientSpinModel = OiiaCatModel.create(OiiaCatModel.SPIN_MODEL);
+        }
+        Object chosen = powered ? be.clientSpinModel : be.clientModel;
+        if (!(chosen instanceof RenderableModel model)) {
+            return; // Shadered hasn't loaded the model (yet)
+        }
 
         // Shadered's model renderer works in world coordinates (like MaxwellRenderer).
         BlockPos pos = be.getBlockPos();
@@ -39,9 +45,9 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
         pose.scale(OiiaCatModel.SCALE, OiiaCatModel.SCALE, OiiaCatModel.SCALE);
         pose.translate(0, OiiaCatModel.FEET, 0);
 
-        // Animate only while powered by redstone, starting from the first frame each time the signal turns on.
+        // Spin only while powered by redstone, starting from the first frame each time the signal turns on.
         float seconds = 0;
-        if (be.getBlockState().getValue(OiiaCatBlock.POWERED) && be.getLevel() != null) {
+        if (powered && be.getLevel() != null) {
             long now = be.getLevel().getGameTime();
             if (be.animationStart < 0) {
                 be.animationStart = now;

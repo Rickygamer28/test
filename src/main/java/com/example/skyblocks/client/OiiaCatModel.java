@@ -16,7 +16,14 @@ import org.joml.Quaternionf;
  * Shadered's animator only animates skeletons and this model moves as a whole.
  */
 final class OiiaCatModel {
+    /** The cat as it stands (base shape of the original model). */
     static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(SkyBlocksMod.MOD_ID, "models/complex/oiia_cat.glb");
+    /**
+     * The same cat with the original model's blend shape fully applied: the curled-up "loaf" it turns into while it
+     * spins. Shadered's renderer can't blend shapes, and the original animation switches it fully on/off, so it is
+     * a second model (built by tools/models/oiia_cat from the FBX's blend shape).
+     */
+    static final ResourceLocation SPIN_MODEL = ResourceLocation.fromNamespaceAndPath(SkyBlocksMod.MOD_ID, "models/complex/oiia_cat_spin.glb");
 
     /** Model units -> blocks. The model is about 38.7 units tall, so this makes it about 0.8 blocks tall. */
     static final float SCALE = 0.02F;
@@ -26,7 +33,12 @@ final class OiiaCatModel {
     /** A fresh renderable for the loaded model, or null while Shadered hasn't loaded it (yet). */
     @Nullable
     static RenderableModel create() {
-        McModel model = AssimpModels.getModel(MODEL);
+        return create(MODEL);
+    }
+
+    @Nullable
+    static RenderableModel create(ResourceLocation location) {
+        McModel model = AssimpModels.getModel(location);
         if (model == null) {
             return null;
         }

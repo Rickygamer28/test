@@ -16,13 +16,15 @@ Recipes (shapeless): Jupiter = Glass + Amethyst Shard, Cat = Glass + Raw Cod, Tw
 Shadered+ skies (blocks, ores, emitter settings) before removing the mod from a world.
 
 ## Models (like Shadered's Maxwell)
-- **OIIA Cat** (`skyblocks:oiia_cat`): a 3D cat that faces you when placed. Give it a **redstone signal** and it plays
-  its own spin-and-bob animation (from the model file, about 4.8 s loop) from the start, for as long as the signal lasts;
-  without a signal it stands still. Inventory shows a flat icon, hands/item frames show the model.
+- **OIIA Cat** (`skyblocks:oiia_cat`): a 3D cat that faces you when placed. Give it a **redstone signal** and it turns
+  into the curled-up "loaf" shape and spins and bobs (the original model's animation, about 4.8 s loop) for as long as the
+  signal lasts; without a signal it is the standing cat, still. Inventory shows a flat icon, hands/item frames the model.
 
 How it works: Shadered's model loader reads every `models/complex/` file of every mod, so our models live in
-`assets/skyblocks/models/complex/` (here `oiia_cat.glb`, converted from the original FBX in `tools/models/oiia_cat/`
-with the texture embedded and reduced to 1024x1024). `OiiaCatRenderer` hands the model to Shadered's model renderer,
+`assets/skyblocks/models/complex/` (`oiia_cat.glb` and `oiia_cat_spin.glb`, converted from the original FBX in
+`tools/models/oiia_cat/`, texture embedded and reduced to 1024x1024). The FBX has a blend shape (the loaf pose) that the
+original animation switches fully on while spinning; Shadered can't blend shapes, so the loaf is the second model
+(base positions + blend-shape offsets, normals recomputed) and the renderer swaps between the two. `OiiaCatRenderer` hands the model to Shadered's model renderer,
 like Shadered's `MaxwellRenderer`. Shadered's animator only animates skeletons, and this model animates as a whole, so
 `OiiaCatModel.animate` plays the file's keyframes (`OiiaCatAnimation`) itself.
 
