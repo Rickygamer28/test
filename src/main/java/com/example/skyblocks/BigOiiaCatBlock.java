@@ -1,14 +1,18 @@
 package com.example.skyblocks;
 
 import com.mojang.serialization.MapCodec;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -17,97 +21,182 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The big OIIA cat: what a 3x3x3 cube of OIIA cats turns into. It fills all 27 blocks: each one is a part of this
- * block, with PART_X/Y/Z saying where it sits in the cube. The bottom-centre part (1, 0, 1) is the "master": only it
- * has a block entity, which draws the cat at 3x size (client/OiiaCatRenderer) and holds FACING/POWERED.
+ * The big OIIA cat: what a cube of OIIA cats turns into, from 2x2x2 up to 23x23x23. The cat is the small cat scaled
+ * by the cube's size N, so it fills the cube like the small cat fills its block. The blocks of the cube that the cat
+ * covers become parts of this block; the rest of the cube becomes air.
+ *
+ * The bottom-centre part is the "master": only it has a block entity (BigOiiaCatBlockEntity: size, facing,
+ * redstone power), which draws the cat (client/OiiaCatRenderer). Every other part points one step towards the master
+ * (LINK), so any part can find it. EDGE_X/Y/Z and CUT give each part its share of the cat's collision shape.
+ *
  * A redstone signal on any part makes it spin, like the small cat. Breaking any part breaks the whole cat and gives
- * back the 27 small cats.
+ * back all N*N*N small cats.
  */
-public class BigOiiaCatBlock extends HorizontalDirectionalBlock implements EntityBlock {
+public class BigOiiaCatBlock extends Block implements EntityBlock {
     public static final MapCodec<BigOiiaCatBlock> CODEC = simpleCodec(BigOiiaCatBlock::new);
 
-    public static final IntegerProperty PART_X = IntegerProperty.create("part_x", 0, 2);
-    public static final IntegerProperty PART_Y = IntegerProperty.create("part_y", 0, 2);
-    public static final IntegerProperty PART_Z = IntegerProperty.create("part_z", 0, 2);
-    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final int MIN_SIZE = 2;
+    public static final int MAX_SIZE = 23;
 
-    /** How many times bigger than the small cat. */
-    public static final int SIZE = 3;
-    /** Small cats given back when it is broken. */
-    public static final int CATS = SIZE * SIZE * SIZE;
+    /** Which way the master is from this part (MASTER = this is it). */
+    public enum Link implements StringRepresentable {
+        MASTER(null), DOWN(Direction.DOWN), NORTH(Direction.NORTH), SOUTH(Direction.SOUTH), WEST(Direction.WEST), EAST(Direction.EAST);
 
-    /** Each part's share of the small cat's shape (3..13 x 0..13 x 3..13 pixels), scaled 3x over the cube. */
-    private static final VoxelShape[] SHAPES = new VoxelShape[CATS];
-    /** The whole big cat's shape seen from each part, so the selection outline shows the whole cat. */
-    private static final VoxelShape[] OUTLINES = new VoxelShape[CATS];
+        @Nullable
+        final Direction direction;
+
+        Link(@Nullable Direction direction) {
+            this.direction = direction;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return name().toLowerCase(java.util.Locale.ROOT);
+        }
+    }
+
+    /** Where a part sits in the cat along one axis: on its low side, inside, or on its high side. */
+    public enum Edge implements StringRepresentable {
+        LOW, MID, HIGH;
+
+        @Override
+        public String getSerializedName() {
+            return name().toLowerCase(java.util.Locale.ROOT);
+        }
+    }
+
+    public static final EnumProperty<Link> LINK = EnumProperty.create("link", Link.class);
+    public static final EnumProperty<Edge> EDGE_X = EnumProperty.create("edge_x", Edge.class);
+    public static final EnumProperty<Edge> EDGE_Y = EnumProperty.create("edge_y", Edge.class, Edge.MID, Edge.HIGH);
+    public static final EnumProperty<Edge> EDGE_Z = EnumProperty.create("edge_z", Edge.class);
+    /**
+     * How far (in pixels) the cat's sides start into the low-side parts: (3 * N) mod 16. The small cat's shape is
+     * 3..13 x 0..13 x 3..13 pixels, so scaled by N its sides start at 3N/16 blocks and end at 13N/16 blocks; the
+     * high-side parts are cut at 16 - CUT pixels (13N mod 16 = -3N mod 16), and so is the top.
+     */
+    public static final IntegerProperty CUT = IntegerProperty.create("cut", 0, 15);
+
+    /** Collision shapes by [cut][edge x][edge y (MID/HIGH)][edge z]. */
+    private static final VoxelShape[][][][] SHAPES = new VoxelShape[16][3][2][3];
 
     static {
-        double lo = 3 * SIZE / 16.0, hiXZ = 13 * SIZE / 16.0, hiY = 13 * SIZE / 16.0; // in blocks, inside the cube
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < SIZE; z++) {
-                    double x0 = Math.max(0, lo - x), x1 = Math.min(1, hiXZ - x);
-                    double y0 = Math.max(0, -y), y1 = Math.min(1, hiY - y);
-                    double z0 = Math.max(0, lo - z), z1 = Math.min(1, hiXZ - z);
-                    SHAPES[index(x, y, z)] = x1 > x0 && y1 > y0 && z1 > z0
-                            ? Block.box(x0 * 16, y0 * 16, z0 * 16, x1 * 16, y1 * 16, z1 * 16)
-                            : Shapes.empty();
-                    OUTLINES[index(x, y, z)] = Block.box((lo - x) * 16, -y * 16, (lo - z) * 16,
-                            (hiXZ - x) * 16, (hiY - y) * 16, (hiXZ - z) * 16);
+        for (int cut = 0; cut < 16; cut++) {
+            int high = cut == 0 ? 16 : 16 - cut;
+            for (Edge ex : Edge.values()) {
+                for (int ey = 0; ey < 2; ey++) {
+                    for (Edge ez : Edge.values()) {
+                        double x0 = ex == Edge.LOW ? cut : 0, x1 = ex == Edge.HIGH ? high : 16;
+                        double z0 = ez == Edge.LOW ? cut : 0, z1 = ez == Edge.HIGH ? high : 16;
+                        double y1 = ey == 1 ? high : 16;
+                        SHAPES[cut][ex.ordinal()][ey][ez.ordinal()] = Block.box(x0, 0, z0, x1, y1, z1);
+                    }
                 }
             }
         }
     }
 
-    /** True while this class itself removes parts, so their removal doesn't start another break. */
-    private static boolean dismantling;
+    /** True while this class itself changes parts, so those changes don't start redstone checks or breaks. */
+    private static boolean busy;
 
     public BigOiiaCatBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, false)
-                .setValue(PART_X, 0).setValue(PART_Y, 0).setValue(PART_Z, 0));
+        registerDefaultState(stateDefinition.any().setValue(LINK, Link.MASTER).setValue(EDGE_X, Edge.MID)
+                .setValue(EDGE_Y, Edge.MID).setValue(EDGE_Z, Edge.MID).setValue(CUT, 0));
     }
 
     @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+    protected MapCodec<? extends Block> codec() {
         return CODEC;
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, POWERED, PART_X, PART_Y, PART_Z);
+        builder.add(LINK, EDGE_X, EDGE_Y, EDGE_Z, CUT);
     }
 
-    private static int index(int x, int y, int z) {
-        return (x * SIZE + y) * SIZE + z;
+    // ---- geometry (cube coordinates: 0..N-1 from the cube's lowest north-west corner) ----
+
+    /** First block of the cube (per axis, x/z) that the cat covers. */
+    static int low(int n) {
+        return 3 * n / 16;
     }
+
+    /** Last block of the cube (per axis, x/y/z) that the cat covers. */
+    static int high(int n) {
+        return (13 * n + 15) / 16 - 1;
+    }
+
+    /** The master's x/z in the cube (its y is 0). */
+    static int middle(int n) {
+        return n / 2;
+    }
+
+    static boolean covered(int n, int x, int y, int z) {
+        int lo = low(n), hi = high(n);
+        return x >= lo && x <= hi && z >= lo && z <= hi && y <= hi;
+    }
+
+    /** The cube's lowest north-west corner, from the master's position. */
+    static BlockPos origin(BlockPos master, int n) {
+        return master.offset(-middle(n), 0, -middle(n));
+    }
+
+    /** The cat's whole shape (the small cat's shape scaled by n), in world coordinates. */
+    public static AABB catBox(BlockPos master, int n) {
+        BlockPos o = origin(master, n);
+        double lo = 3 * n / 16.0, hi = 13 * n / 16.0;
+        return new AABB(o.getX() + lo, o.getY(), o.getZ() + lo, o.getX() + hi, o.getY() + hi, o.getZ() + hi);
+    }
+
+    private BlockState partState(int n, int x, int y, int z) {
+        int lo = low(n), hi = high(n), m = middle(n);
+        Link link = y > 0 ? Link.DOWN
+                : x < m ? Link.EAST : x > m ? Link.WEST
+                : z < m ? Link.SOUTH : z > m ? Link.NORTH
+                : Link.MASTER;
+        return defaultBlockState().setValue(LINK, link)
+                .setValue(EDGE_X, x == lo ? Edge.LOW : x == hi ? Edge.HIGH : Edge.MID)
+                .setValue(EDGE_Y, y == hi ? Edge.HIGH : Edge.MID)
+                .setValue(EDGE_Z, z == lo ? Edge.LOW : z == hi ? Edge.HIGH : Edge.MID)
+                .setValue(CUT, (3 * n) % 16);
+    }
+
+    /** Follows the parts' links to the master; null if the chain is broken. */
+    @Nullable
+    public static BlockPos findMaster(BlockGetter level, BlockPos pos, BlockState state) {
+        BlockPos cur = pos;
+        BlockState st = state;
+        for (int step = 0; step <= 3 * MAX_SIZE; step++) {
+            if (!(st.getBlock() instanceof BigOiiaCatBlock)) {
+                return null;
+            }
+            Link link = st.getValue(LINK);
+            if (link == Link.MASTER) {
+                return cur;
+            }
+            cur = cur.relative(link.direction);
+            st = level.getBlockState(cur);
+        }
+        return null;
+    }
+
+    // ---- block behaviour ----
 
     static boolean isMaster(BlockState state) {
-        return state.getValue(PART_X) == 1 && state.getValue(PART_Y) == 0 && state.getValue(PART_Z) == 1;
-    }
-
-    /** The cube's lowest north-west corner. */
-    static BlockPos origin(BlockPos pos, BlockState state) {
-        return pos.offset(-state.getValue(PART_X), -state.getValue(PART_Y), -state.getValue(PART_Z));
-    }
-
-    static BlockPos master(BlockPos origin) {
-        return origin.offset(1, 0, 1);
+        return state.getValue(LINK) == Link.MASTER;
     }
 
     @Nullable
@@ -121,16 +210,11 @@ public class BigOiiaCatBlock extends HorizontalDirectionalBlock implements Entit
         return isMaster(state) ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.INVISIBLE;
     }
 
-    /** Outline / aiming: the whole cat. */
+    /** This part's share of the cat (the outline of the whole cat is drawn by client/BigOiiaCatOutline). */
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return OUTLINES[index(state.getValue(PART_X), state.getValue(PART_Y), state.getValue(PART_Z))];
-    }
-
-    /** Collision: only this part's own share of the cat, inside its block. */
-    @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPES[index(state.getValue(PART_X), state.getValue(PART_Y), state.getValue(PART_Z))];
+        return SHAPES[state.getValue(CUT)][state.getValue(EDGE_X).ordinal()]
+                [state.getValue(EDGE_Y) == Edge.HIGH ? 1 : 0][state.getValue(EDGE_Z).ordinal()];
     }
 
     @Override
@@ -138,7 +222,7 @@ public class BigOiiaCatBlock extends HorizontalDirectionalBlock implements Entit
         return new ItemStack(ModItems.OIIA_CAT.get());
     }
 
-    /** Drops are handled below (all 27 cats once, not one per part). */
+    /** Drops are handled below (all the cats once, not one per part). */
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         return Collections.emptyList();
@@ -147,65 +231,92 @@ public class BigOiiaCatBlock extends HorizontalDirectionalBlock implements Entit
     // ---- forming ----
 
     /**
-     * Called when a small cat is placed: if it completes a 3x3x3 cube of small cats, they become one big cat,
-     * facing the same way as the cat just placed (so, the player).
+     * Called when a small cat is placed. If the cats touching it (sides, not corners) form exactly a solid cube of
+     * 2x2x2 to 23x23x23, they become one big cat, facing the same way as the cat just placed (so, the player).
      */
     public static void tryForm(Level level, BlockPos placed) {
         BlockState placedState = level.getBlockState(placed);
-        if (!placedState.is(ModBlocks.OIIA_CAT.get())) {
+        Block cat = ModBlocks.OIIA_CAT.get();
+        if (!placedState.is(cat)) {
             return;
         }
-        for (int ox = 0; ox < SIZE; ox++) {
-            for (int oy = 0; oy < SIZE; oy++) {
-                for (int oz = 0; oz < SIZE; oz++) {
-                    BlockPos origin = placed.offset(-ox, -oy, -oz);
-                    if (allSmallCats(level, origin)) {
-                        form(level, origin, placedState.getValue(FACING));
-                        return;
+        Set<BlockPos> cats = new HashSet<>();
+        ArrayDeque<BlockPos> queue = new ArrayDeque<>();
+        placed = placed.immutable();
+        cats.add(placed);
+        queue.add(placed);
+        int minX = placed.getX(), minY = placed.getY(), minZ = placed.getZ();
+        int maxX = minX, maxY = minY, maxZ = minZ;
+        while (!queue.isEmpty()) {
+            BlockPos p = queue.poll();
+            minX = Math.min(minX, p.getX()); maxX = Math.max(maxX, p.getX());
+            minY = Math.min(minY, p.getY()); maxY = Math.max(maxY, p.getY());
+            minZ = Math.min(minZ, p.getZ()); maxZ = Math.max(maxZ, p.getZ());
+            if (maxX - minX >= MAX_SIZE || maxY - minY >= MAX_SIZE || maxZ - minZ >= MAX_SIZE) {
+                return; // bigger than the biggest cube
+            }
+            for (Direction d : Direction.values()) {
+                BlockPos next = p.relative(d);
+                if (!cats.contains(next) && level.isLoaded(next) && level.getBlockState(next).is(cat)) {
+                    cats.add(next.immutable());
+                    queue.add(next.immutable());
+                }
+            }
+        }
+        int n = maxX - minX + 1;
+        if (n < MIN_SIZE || maxY - minY + 1 != n || maxZ - minZ + 1 != n || cats.size() != n * n * n) {
+            return;
+        }
+        ((BigOiiaCatBlock) ModBlocks.BIG_OIIA_CAT.get()).form(level, new BlockPos(minX, minY, minZ), n,
+                placedState.getValue(OiiaCatBlock.FACING));
+    }
+
+    private void form(Level level, BlockPos origin, int n, Direction facing) {
+        busy = true;
+        try {
+            // Replace the whole cube without neighbour updates first (no part sees a half-built cat)...
+            for (int x = 0; x < n; x++) {
+                for (int y = 0; y < n; y++) {
+                    for (int z = 0; z < n; z++) {
+                        BlockState s = covered(n, x, y, z) ? partState(n, x, y, z) : Blocks.AIR.defaultBlockState();
+                        level.setBlock(origin.offset(x, y, z), s, Block.UPDATE_CLIENTS);
                     }
                 }
             }
-        }
-    }
-
-    private static boolean allSmallCats(Level level, BlockPos origin) {
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < SIZE; z++) {
-                    if (!level.getBlockState(origin.offset(x, y, z)).is(ModBlocks.OIIA_CAT.get())) {
-                        return false;
-                    }
-                }
+            BlockPos master = origin.offset(middle(n), 0, middle(n));
+            if (level.getBlockEntity(master) instanceof BigOiiaCatBlockEntity be) {
+                be.setup(n, facing);
             }
+            // ...then tell the blocks around the cube.
+            forEachShell(origin, 0, n - 1, 0, n - 1, p -> level.updateNeighborsAt(p, this));
+        } finally {
+            busy = false;
         }
-        return true;
-    }
+        BlockPos master = origin.offset(middle(n), 0, middle(n));
+        if (level.getBlockEntity(master) instanceof BigOiiaCatBlockEntity be) {
+            be.setPowered(anySignal(level, origin, n));
+        }
 
-    private static void form(Level level, BlockPos origin, Direction facing) {
-        BlockState base = ModBlocks.BIG_OIIA_CAT.get().defaultBlockState().setValue(FACING, facing);
-        // Replace all 27 without neighbour updates first, so no part sees a half-built cube...
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < SIZE; z++) {
-                    BlockState part = base.setValue(PART_X, x).setValue(PART_Y, y).setValue(PART_Z, z);
-                    level.setBlock(origin.offset(x, y, z), part, Block.UPDATE_CLIENTS);
-                }
-            }
-        }
-        // ...then tell the neighbours, and pick up any redstone signal already there.
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < SIZE; z++) {
-                    level.updateNeighborsAt(origin.offset(x, y, z), ModBlocks.BIG_OIIA_CAT.get());
-                }
-            }
-        }
-        updatePower(level, origin);
-
-        double cx = origin.getX() + SIZE / 2.0, cy = origin.getY() + SIZE / 2.0, cz = origin.getZ() + SIZE / 2.0;
-        level.playSound(null, master(origin), SoundEvents.CAT_AMBIENT, SoundSource.BLOCKS, 2.0F, 0.5F);
+        AABB box = catBox(master, n);
+        float pitch = Math.max(0.5F, 1.2F - n * 0.05F);
+        level.playSound(null, master, SoundEvents.CAT_AMBIENT, SoundSource.BLOCKS, 1.0F + n / 4.0F, pitch);
         if (level instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.POOF, cx, cy, cz, 80, 1.2, 1.2, 1.2, 0.02);
+            server.sendParticles(ParticleTypes.POOF, box.getCenter().x, box.getCenter().y, box.getCenter().z,
+                    Math.min(400, 30 * n), n * 0.35, n * 0.35, n * 0.35, 0.02);
+        }
+    }
+
+    /** Runs for each block on the surface of the box lo..hi (x/z) by 0..yHi (y), in cube coordinates. */
+    private static void forEachShell(BlockPos origin, int lo, int hi, int yLo, int yHi,
+                                     java.util.function.Consumer<BlockPos> action) {
+        for (int x = lo; x <= hi; x++) {
+            for (int y = yLo; y <= yHi; y++) {
+                for (int z = lo; z <= hi; z++) {
+                    if (x == lo || x == hi || y == yLo || y == yHi || z == lo || z == hi) {
+                        action.accept(origin.offset(x, y, z));
+                    }
+                }
+            }
         }
     }
 
@@ -215,36 +326,39 @@ public class BigOiiaCatBlock extends HorizontalDirectionalBlock implements Entit
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
                                    BlockPos neighborPos, boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
-        if (!level.isClientSide) {
-            updatePower(level, origin(pos, state));
+        if (level.isClientSide || busy) {
+            return;
+        }
+        BlockPos master = findMaster(level, pos, state);
+        if (master == null || !(level.getBlockEntity(master) instanceof BigOiiaCatBlockEntity be) || be.size() < MIN_SIZE) {
+            return;
+        }
+        if (level.hasNeighborSignal(pos)) {
+            be.setPowered(true);
+        } else if (be.powered()) {
+            // This part lost its signal: still powered only if another part has one.
+            be.setPowered(anySignal(level, origin(master, be.size()), be.size()));
         }
     }
 
-    /** POWERED (on the master) = any part gets a redstone signal. */
-    private static void updatePower(Level level, BlockPos origin) {
-        boolean powered = false;
-        for (int x = 0; x < SIZE && !powered; x++) {
-            for (int y = 0; y < SIZE && !powered; y++) {
-                for (int z = 0; z < SIZE && !powered; z++) {
-                    powered = level.hasNeighborSignal(origin.offset(x, y, z));
-                }
+    /** Any part gets a redstone signal (only parts on the cat's surface can: inside ones only touch parts). */
+    private static boolean anySignal(Level level, BlockPos origin, int n) {
+        boolean[] found = {false};
+        forEachShell(origin, low(n), high(n), 0, high(n), p -> {
+            if (!found[0] && level.hasNeighborSignal(p)) {
+                found[0] = true;
             }
-        }
-        BlockPos master = master(origin);
-        BlockState state = level.getBlockState(master);
-        if (state.is(ModBlocks.BIG_OIIA_CAT.get()) && isMaster(state) && state.getValue(POWERED) != powered) {
-            level.setBlock(master, state.setValue(POWERED, powered), Block.UPDATE_CLIENTS);
-        }
+        });
+        return found[0];
     }
 
     // ---- breaking ----
 
-    /** A player breaks a part: remove the rest, and give back the 27 cats unless creative or the wrong tool. */
+    /** A player breaks a part: remove the rest, and give back the cats unless creative or the wrong tool. */
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide) {
-            boolean drop = !player.isCreative() && player.hasCorrectToolForDrops(state);
-            dismantle(level, pos, state, drop);
+            dismantle(level, pos, state, !player.isCreative() && player.hasCorrectToolForDrops(state));
         }
         return super.playerWillDestroy(level, pos, state, player);
     }
@@ -252,51 +366,50 @@ public class BigOiiaCatBlock extends HorizontalDirectionalBlock implements Entit
     /** Any other removal (explosion, command, ...): the same, with the cats dropped. */
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!level.isClientSide && !dismantling && !newState.is(this)) {
+        if (!level.isClientSide && !busy && !newState.is(this)) {
             dismantle(level, pos, state, true);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
-    /**
-     * Removes the cube's other parts. The cats are dropped only if the cube was still whole, so a cube already
-     * taken apart (for example by the player break just before this part's own removal) drops nothing more.
-     */
-    private static void dismantle(Level level, BlockPos pos, BlockState state, boolean drop) {
-        BlockPos origin = origin(pos, state);
-        boolean whole = true;
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < SIZE; z++) {
-                    BlockState other = level.getBlockState(origin.offset(x, y, z));
-                    if (!isPart(other, x, y, z)) {
-                        whole = false;
-                    }
-                }
-            }
+    private void dismantle(Level level, BlockPos pos, BlockState state, boolean drop) {
+        BlockPos master = findMaster(level, pos, state);
+        if (master == null || !(level.getBlockEntity(master) instanceof BigOiiaCatBlockEntity be) || be.dismantled) {
+            return; // already being taken apart
         }
-        dismantling = true;
+        be.dismantled = true;
+        int n = be.size();
+        if (n < MIN_SIZE) {
+            return;
+        }
+        BlockPos origin = origin(master, n);
+        int lo = low(n), hi = high(n);
+        busy = true;
         try {
-            for (int x = 0; x < SIZE; x++) {
-                for (int y = 0; y < SIZE; y++) {
-                    for (int z = 0; z < SIZE; z++) {
+            for (int x = lo; x <= hi; x++) {
+                for (int y = 0; y <= hi; y++) {
+                    for (int z = lo; z <= hi; z++) {
                         BlockPos p = origin.offset(x, y, z);
-                        if (!p.equals(pos) && isPart(level.getBlockState(p), x, y, z)) {
-                            level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                        if (!p.equals(pos) && level.getBlockState(p).is(this)) {
+                            level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                         }
                     }
                 }
             }
         } finally {
-            dismantling = false;
+            busy = false;
         }
-        if (whole && drop) {
-            popResource(level, master(origin), new ItemStack(ModItems.OIIA_CAT.get(), CATS));
-        }
-    }
+        forEachShell(origin, lo, hi, 0, hi, p -> level.updateNeighborsAt(p, Blocks.AIR));
 
-    private static boolean isPart(BlockState state, int x, int y, int z) {
-        return state.is(ModBlocks.BIG_OIIA_CAT.get())
-                && state.getValue(PART_X) == x && state.getValue(PART_Y) == y && state.getValue(PART_Z) == z;
+        if (drop) {
+            int cats = n * n * n;
+            int width = hi - lo + 1;
+            while (cats > 0) {
+                int count = Math.min(64, cats);
+                cats -= count;
+                BlockPos at = origin.offset(lo + level.random.nextInt(width), 0, lo + level.random.nextInt(width));
+                popResource(level, at, new ItemStack(ModItems.OIIA_CAT.get(), count));
+            }
+        }
     }
 }

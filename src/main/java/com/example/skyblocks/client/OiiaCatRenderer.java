@@ -1,6 +1,5 @@
 package com.example.skyblocks.client;
 
-import com.example.skyblocks.OiiaCatBlock;
 import com.example.skyblocks.OiiaCatBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -18,29 +17,26 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix4f;
 
 /**
  * Same approach as Shadered's MaxwellRenderer: hands the model, with its world matrix, to Shadered's model renderer.
- * Draws the small cat (size 1) and the big cat (size 3, from the big cat's bottom-centre block).
+ * Draws the small cat and the big cat (from the big cat's bottom-centre block, at the cube's size).
  */
 public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> {
-    private final float size;
 
-    public OiiaCatRenderer(BlockEntityRendererProvider.Context context) {
-        this(context, 1.0F);
-    }
-
-    public OiiaCatRenderer(BlockEntityRendererProvider.Context context, float size) {
-        this.size = size;
-    }
+    public OiiaCatRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
     public void render(OiiaCatBlockEntity be, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        boolean powered = be.getBlockState().getValue(OiiaCatBlock.POWERED);
+        int size = be.size();
+        if (size <= 0) {
+            return; // big cat whose size hasn't reached this client yet
+        }
+        boolean powered = be.powered();
+        double center = be.centerOffset();
 
         // Without a signal: the standing cat. With a signal: the loaf pose, spinning (like the original animation).
         if (!(be.clientModel instanceof RenderableModel)) {
@@ -57,8 +53,8 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
         // Shadered's model renderer works in world coordinates (like MaxwellRenderer).
         BlockPos pos = be.getBlockPos();
         PoseStack pose = new PoseStack();
-        pose.translate(pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F);
-        pose.mulPose(Axis.YP.rotationDegrees(yaw(be.getBlockState().getValue(HorizontalDirectionalBlock.FACING))));
+        pose.translate(pos.getX() + center, pos.getY(), pos.getZ() + center);
+        pose.mulPose(Axis.YP.rotationDegrees(yaw(be.facing())));
         float scale = OiiaCatModel.SCALE * size;
         pose.scale(scale, scale, scale);
         pose.translate(0, OiiaCatModel.FEET, 0);
@@ -81,7 +77,7 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
 
         // How high the cat's lowest point is above the floor, in blocks (the loaf floats and bobs while spinning).
         float lift = powered ? (OiiaCatModel.SPIN_BOTTOM + offsetY) * scale : 0;
-        renderShadow(be, poseStack, buffer, Math.max(0, lift), size);
+        renderShadow(be, poseStack, buffer, Math.max(0, lift), size, (float) center);
     }
 
     private static final ResourceLocation SHADOW = ResourceLocation.withDefaultNamespace("textures/misc/shadow.png");
@@ -95,7 +91,7 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
      * is no solid floor.
      */
     private static void renderShadow(OiiaCatBlockEntity be, PoseStack poseStack, MultiBufferSource buffer, float lift,
-                                     float size) {
+                                     float size, float center) {
         Minecraft mc = Minecraft.getInstance();
         Level level = be.getLevel();
         if (level == null || !mc.options.entityShadows().get()) {
@@ -113,10 +109,10 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
         PoseStack.Pose last = poseStack.last();
         float y = 0.002F; // just above the floor (the bottom of our block)
         float r = SHADOW_RADIUS * size;
-        shadowVertex(consumer, last, 0.5F - r, y, 0.5F - r, 0, 0, alpha);
-        shadowVertex(consumer, last, 0.5F - r, y, 0.5F + r, 0, 1, alpha);
-        shadowVertex(consumer, last, 0.5F + r, y, 0.5F + r, 1, 1, alpha);
-        shadowVertex(consumer, last, 0.5F + r, y, 0.5F - r, 1, 0, alpha);
+        shadowVertex(consumer, last, center - r, y, center - r, 0, 0, alpha);
+        shadowVertex(consumer, last, center - r, y, center + r, 0, 1, alpha);
+        shadowVertex(consumer, last, center + r, y, center + r, 1, 1, alpha);
+        shadowVertex(consumer, last, center + r, y, center - r, 1, 0, alpha);
     }
 
     private static void shadowVertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float z,
@@ -141,6 +137,17 @@ public class OiiaCatRenderer implements BlockEntityRenderer<OiiaCatBlockEntity> 
 
     @Override
     public AABB getRenderBoundingBox(OiiaCatBlockEntity be) {
-        return new AABB(be.getBlockPos()).inflate(1.5 * size); // the spinning tail reaches past the block
+        int size = Math.max(1, be.size());
+        BlockPos pos = be.getBlockPos();
+        double c = be.centerOffset();
+        // around the cat's feet, reaching up and out past the cat (the spinning tail sticks out)
+        return new AABB(pos.getX() + c, pos.getY(), pos.getZ() + c, pos.getX() + c, pos.getY() + size, pos.getZ() + c)
+                .inflate(1.5 * size);
+    }
+
+    /** Big cats can be seen from further away than block entities usually are. */
+    @Override
+    public int getViewDistance() {
+        return 256;
     }
 }

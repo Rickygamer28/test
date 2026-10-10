@@ -1,6 +1,7 @@
 package com.example.skyblocks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,5 +21,23 @@ public class OiiaCatBlockEntity extends BlockEntity {
 
     protected OiiaCatBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    /** How many times the small cat's size to draw it (0 = not set up yet: don't draw). */
+    public int size() {
+        return 1;
+    }
+
+    public Direction facing() {
+        return getBlockState().getValue(OiiaCatBlock.FACING);
+    }
+
+    public boolean powered() {
+        return getBlockState().getValue(OiiaCatBlock.POWERED);
+    }
+
+    /** Where the cat's centre is inside this block, on x and z (the small cat stands in the middle). */
+    public double centerOffset() {
+        return 0.5;
     }
 }

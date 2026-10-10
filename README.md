@@ -23,12 +23,19 @@ Shadered+ skies (blocks, ores, emitter settings) before removing the mod from a 
   (top `G L G`, middle `L D L`, bottom `G G G`; G = Gray Wool, L = Light Gray Wool, D = Diamond Block).
   It casts a round shadow on the floor like mobs do (Minecraft's own shadow texture; follows the "Entity Shadows" setting,
   fades as the cat floats up while spinning).
-- **Big OIIA Cat**: build a solid 3x3x3 cube of OIIA cats (27 cats). Placing the last one turns the cube into one
-  big cat, 3x the size, facing the way that last cat faced (with a poof and a deep meow). It works the same: a redstone
-  signal on any of its blocks makes it spin, and it has a 3x shadow. Breaking any part (with a pickaxe) breaks the whole
-  cat and gives back the 27 small cats; nothing drops in creative. Pistons can't move it. It has no item of its own.
-  How it works: `BigOiiaCatBlock` fills all 27 blocks (PART_X/Y/Z say where each block sits in the cube). Only the
-  bottom-centre block has a block entity, drawn by the same `OiiaCatRenderer` at size 3. The outline covers the whole cat.
+- **Big OIIA Cat**: build a solid cube of OIIA cats, any size from 2x2x2 (8 cats) up to 23x23x23 (12,167 cats).
+  Placing the last cat turns the cube into one big cat, as many times bigger as the cube is wide, facing the way that
+  last cat faced (with a poof and a deep meow). The cats touching each other (by their sides) must form exactly the
+  cube: extra cats stuck to it stop it from forming. The cat fills the cube like the small cat fills its block, so the
+  blocks of the cube around the cat become air.
+  It works the same as the small cat: a redstone signal on any of its blocks makes it spin, and it casts a shadow to
+  scale. Breaking any part (with a pickaxe) breaks the whole cat and gives back all the cats used (N x N x N); nothing
+  drops in creative. Pistons can't move it. It has no item of its own.
+  How it works: `BigOiiaCatBlock` fills the blocks the cat covers. Each part points one step towards the bottom-centre
+  part (`link`), whose block entity (`BigOiiaCatBlockEntity`) stores the size, facing and redstone power and is drawn
+  by `OiiaCatRenderer` at that size. `edge_x/y/z` and `cut` give each part its piece of the cat's collision shape.
+  `client/BigOiiaCatOutline` outlines the whole cat when you look at any part. Sizes: `MIN_SIZE`/`MAX_SIZE` in
+  `BigOiiaCatBlock`.
 
 How it works: Shadered's model loader reads every `models/complex/` file of every mod, so our models live in
 `assets/skyblocks/models/complex/` (`oiia_cat.glb` and `oiia_cat_spin.glb`, converted from the original FBX in
